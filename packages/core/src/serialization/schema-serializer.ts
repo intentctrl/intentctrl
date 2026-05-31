@@ -1,5 +1,6 @@
 import type { ZodType } from 'zod'
-import type { JsonSchema, RegisteredTool, SerializedTool } from '@intentctrl/types'
+import type { RegisteredTool } from '../registry/built-in-tools'
+import type { JsonSchema, SerializedTool } from '@intentctrl/types'
 
 // Walks a Zod schema's def and returns a JSON Schema draft-7 object
 export function serializeSchema(schema: ZodType): JsonSchema {

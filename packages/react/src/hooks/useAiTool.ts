@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef } from "react";
 import { registerScoped } from "@intentctrl/core";
-import type { RegisteredTool } from "@intentctrl/types";
+import type { RegisteredTool } from "@intentctrl/core";
 import z from "zod";
 import type { ZodType } from "zod";
 

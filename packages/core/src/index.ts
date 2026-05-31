@@ -23,3 +23,4 @@ export { serializeSchema, serializeTool } from './serialization/schema-serialize
 
 // re-export types used by consumers
 export type { ExecuteToolParams, ExecuteToolResult } from './executor/tool-executor'
+export type { RegisteredTool } from './registry/built-in-tools'

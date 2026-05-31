@@ -1,4 +1,5 @@
-import type { RuntimePermissions, BuiltInToolName } from '@intentctrl/types'
+import type { RuntimePermissions } from '@intentctrl/types'
+import type { BuiltInToolName } from '../registry/built-in-tools'
 
 const BUILT_IN_TOOL_NAMES = new Set<string>([
   'navigate', 'click', 'type', 'highlight', 'scroll', 'extract',

@@ -1,5 +1,5 @@
 import { createStore } from "zustand/vanilla";
-import type { RegisteredTool } from "@intentctrl/types";
+import type { RegisteredTool } from "./built-in-tools";
 
 interface ToolRegistryState {
   tools: Map<string, RegisteredTool>;
