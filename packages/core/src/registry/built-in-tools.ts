@@ -1,10 +1,13 @@
 import z from "zod";
 
-// Names of all SDK-provided built-in tools
-export type BuiltInToolName = "navigate" | "click" | "type" | "highlight" | "scroll" | "extract";
+export interface BuiltInToolDefinition {
+  id: string;
+  description: string;
+  inputSchema: z.ZodTypeAny;
+  needsApproval?: boolean;
+}
 
-// Zod schemas for each built-in tool
-export const BuiltInSchemas = {
+export const builtInSchemas = {
   navigate: z.object({
     target: z.string().describe("Route path to navigate to"),
   }),
@@ -26,12 +29,27 @@ export const BuiltInSchemas = {
   }),
 } as const;
 
-// Inferred input types for each built-in tool
-export type BuiltInToolInput = {
-  [K in BuiltInToolName]: z.infer<(typeof BuiltInSchemas)[K]>;
+export const builtInTools = [
+  { id: "navigate", description: "Navigate to a route in the application", inputSchema: builtInSchemas.navigate },
+  { id: "click", description: "Click a button or interactive element by its label", inputSchema: builtInSchemas.click },
+  { id: "type", description: "Type a value into an input field", inputSchema: builtInSchemas.type },
+  { id: "highlight", description: "Visually highlight a page region to guide the user", inputSchema: builtInSchemas.highlight },
+  { id: "scroll", description: "Scroll a specific element or region into view", inputSchema: builtInSchemas.scroll },
+  { id: "extract", description: "Read the current value of a field or element", inputSchema: builtInSchemas.extract },
+] as const satisfies readonly BuiltInToolDefinition[];
+
+export type BuiltInToolName = (typeof builtInTools)[number]["id"];
+
+export type BuiltInSchemas = {
+  [K in BuiltInToolName]: Extract<(typeof builtInTools)[number], { id: K }>["inputSchema"];
 };
 
-// Developer-registered tool with typed Zod schema and handler
+export type BuiltInToolInput = {
+  [K in BuiltInToolName]: z.infer<BuiltInSchemas[K]>;
+};
+
+export type RuntimePermissions = { [K in BuiltInToolName]?: boolean };
+
 export interface RegisteredTool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> {
   id: string;
   description: string;
@@ -39,43 +57,3 @@ export interface RegisteredTool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> {
   needsApproval?: boolean;
   handler: (input: z.infer<TSchema>) => Promise<unknown>;
 }
-
-interface BuiltInToolDefinition {
-  id: BuiltInToolName;
-  description: string;
-  inputSchema: z.ZodTypeAny;
-}
-
-// Descriptions and schemas for all SDK-provided built-in tools
-export const builtInTools: BuiltInToolDefinition[] = [
-  {
-    id: "navigate",
-    description: "Navigate to a route in the application",
-    inputSchema: BuiltInSchemas.navigate,
-  },
-  {
-    id: "click",
-    description: "Click a button or interactive element by its label",
-    inputSchema: BuiltInSchemas.click,
-  },
-  {
-    id: "type",
-    description: "Type a value into an input field",
-    inputSchema: BuiltInSchemas.type,
-  },
-  {
-    id: "highlight",
-    description: "Visually highlight a page region to guide the user",
-    inputSchema: BuiltInSchemas.highlight,
-  },
-  {
-    id: "scroll",
-    description: "Scroll a specific element or region into view",
-    inputSchema: BuiltInSchemas.scroll,
-  },
-  {
-    id: "extract",
-    description: "Read the current value of a field or element",
-    inputSchema: BuiltInSchemas.extract,
-  },
-];

@@ -1,7 +1,7 @@
-import type { RuntimePermissions } from "@intentctrl/types";
 import { isPermitted } from "./permission-guard";
 import { toolRegistry } from "../registry/tool-registry";
-import { builtInTools } from "../registry/built-in-tools";
+import { builtInTools, type RuntimePermissions } from "../registry/built-in-tools";
+import { executeBuiltIn } from "../lib/built-in-executor";
 
 export interface ExecuteToolParams {
   toolId: string;
@@ -10,17 +10,15 @@ export interface ExecuteToolParams {
   permissions: RuntimePermissions;
 }
 
-export interface ExecuteToolResult {
-  output: unknown;
-  error?: string;
-}
+export type ExecuteToolResult =
+  | { ok: true; output: unknown }
+  | { ok: false; error: string; retryable?: boolean };
 
-// Executes a tool call: permission check → parse → run
 export async function executeTool(params: ExecuteToolParams): Promise<ExecuteToolResult> {
-  const { toolId, toolCallId, input, permissions } = params;
+  const { toolId, input, permissions } = params;
 
   if (!isPermitted(toolId, permissions)) {
-    return { output: null, error: `Permission denied for tool: ${toolId}` };
+    return { ok: false, error: `Permission denied for tool: ${toolId}` };
   }
 
   const registryTool = toolRegistry.getState().getById(toolId);
@@ -28,22 +26,26 @@ export async function executeTool(params: ExecuteToolParams): Promise<ExecuteToo
   if (!registryTool) {
     const isBuiltIn = builtInTools.some((t) => t.id === toolId);
     if (isBuiltIn) {
-      // Signal to @intentctrl/react to handle built-in execution
-      return { output: "__builtin__" };
+      try {
+        const output = await executeBuiltIn(toolId, input);
+        return { ok: true, output };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : "Tool execution failed" };
+      }
     }
-    return { output: null, error: `Unknown tool: ${toolId}` };
+    return { ok: false, error: `Unknown tool: ${toolId}` };
   }
 
   const parsed = registryTool.inputSchema.safeParse(input);
   if (!parsed.success) {
-    return { output: null, error: "Invalid input" };
+    return { ok: false, error: "Invalid input" };
   }
 
   try {
-    const result = await registryTool.handler(parsed.data);
-    return { output: result };
+    const output = await registryTool.handler(parsed.data);
+    return { ok: true, output };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Tool execution failed";
-    return { output: null, error: message };
+    return { ok: false, error: message };
   }
 }

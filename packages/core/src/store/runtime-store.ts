@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla'
-import type { RuntimePermissions } from '@intentctrl/types'
+import type { RuntimePermissions } from '../registry/built-in-tools'
 
 interface RuntimeState {
   dataContext: Record<string, unknown>

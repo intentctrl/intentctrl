@@ -6,10 +6,15 @@ export { extractSemanticNodes } from './context/extractor'
 export { toolRegistry } from './registry/tool-registry'
 export { registerScoped } from './registry/scoped-registry'
 export { builtInTools } from './registry/built-in-tools'
+export type { BuiltInToolName, BuiltInSchemas, BuiltInToolInput, RuntimePermissions, RegisteredTool, BuiltInToolDefinition } from './registry/built-in-tools'
 
 // executor
 export { executeTool } from './executor/tool-executor'
 export { isPermitted } from './executor/permission-guard'
+export type { ExecuteToolParams, ExecuteToolResult } from './executor/tool-executor'
+
+// built-in DOM execution
+export { executeBuiltIn } from './lib/built-in-executor'
 
 // navigation
 export { navigateTo, setRouter } from './navigation/router-bridge'
@@ -20,7 +25,3 @@ export { runtimeStore } from './store/runtime-store'
 
 // serialization
 export { serializeSchema, serializeTool } from './serialization/schema-serializer'
-
-// re-export types used by consumers
-export type { ExecuteToolParams, ExecuteToolResult } from './executor/tool-executor'
-export type { RegisteredTool } from './registry/built-in-tools'

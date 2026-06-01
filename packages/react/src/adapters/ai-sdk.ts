@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
@@ -12,33 +12,38 @@ import {
   executeTool,
   runtimeStore,
   serializeTool,
-  serializeSchema,
 } from "@intentctrl/core";
-import type { SerializedTool } from "@intentctrl/types";
-import { executeBuiltIn } from "../lib/built-in-executor";
+import type { BuiltInToolDefinition } from "@intentctrl/core";
+import type { ApiResponse, IntentCtrlRequestBody, SerializedTool } from "@intentctrl/types";
 
 const apiFetch: typeof globalThis.fetch = async (url, init) => {
   const res = await fetch(url, init);
   if (res.ok) return res;
-  const body = await res.json();
+  const body = (await res.json()) as ApiResponse<unknown>;
   throw new Error(body.message ?? "Request failed");
 };
 
-// Merges developer-registered tools with built-ins, registered ones take precedence
-function getSerializedTools(): SerializedTool[] {
+let cachedSerializedTools: { version: number; tools: SerializedTool[] } | null = null;
+
+function computeSerializedTools(): SerializedTool[] {
   const registered = toolRegistry.getState().getAll().map(serializeTool);
   const registeredIds = new Set(registered.map((t) => t.id));
 
-  const builtInSerialized: SerializedTool[] = builtInTools
+  const builtInSerialized: SerializedTool[] = (builtInTools as readonly BuiltInToolDefinition[])
     .filter((t) => !registeredIds.has(t.id))
-    .map((t) => ({
-      id: t.id,
-      description: t.description,
-      inputSchema: serializeSchema(t.inputSchema),
-      needsApproval: false,
-    }));
+    .map((t) => serializeTool(t));
 
   return [...registered, ...builtInSerialized];
+}
+
+function getSerializedToolsCached(): SerializedTool[] {
+  const version = toolRegistry.getState().getVersion();
+  if (cachedSerializedTools && cachedSerializedTools.version === version) {
+    return cachedSerializedTools.tools;
+  }
+  const tools = computeSerializedTools();
+  cachedSerializedTools = { version, tools };
+  return tools;
 }
 
 export interface UseIntentCtrlChatReturn {
@@ -52,21 +57,17 @@ export interface UseIntentCtrlChatReturn {
   denyToolCall: (toolCallId: string) => void;
 }
 
-// Wraps useChat with IntentCtrl tool dispatch and semantic context injection
-export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrlChatReturn {
-  // Stable ref so onToolCall closure always has current addToolOutput
-  const addToolOutputRef = useRef<
-    | ((params: {
-        tool: string;
-        toolCallId: string;
-        output?: unknown;
-        state?: "output-error" | "output-available";
-        errorText?: string;
-      }) => void)
-    | null
-  >(null);
+type AddToolOutputFn = (params: {
+  tool: string;
+  toolCallId: string;
+  output?: unknown;
+  state?: "output-error" | "output-available";
+  errorText?: string;
+}) => void;
 
-  // Stable transport — only recreated if apiUrl changes
+export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrlChatReturn {
+  const addToolOutputRef = useRef<AddToolOutputFn | null>(null);
+
   const transportRef = useRef<DefaultChatTransport<UIMessage> | null>(null);
   if (!transportRef.current) {
     transportRef.current = new DefaultChatTransport<UIMessage>({
@@ -75,36 +76,49 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
       headers: () => ({
         Authorization: `Bearer ${apiKey}`,
       }),
-      // Inject live semantic snapshot + tools + runtime state on every request
-      body: () => ({
+      body: (): IntentCtrlRequestBody => ({
         semanticContext: buildSemanticGraph(),
-        tools: getSerializedTools(),
+        tools: getSerializedToolsCached(),
         dataContext: runtimeStore.getState().dataContext,
         permissions: runtimeStore.getState().permissions,
       }),
     });
   }
 
-  // Stores pending tool calls that need user approval, keyed by toolCallId
+  useEffect(() => {
+    return toolRegistry.subscribe(() => {
+      cachedSerializedTools = null;
+    });
+  }, []);
+
   const pendingToolCallsRef = useRef<Map<string, { toolName: string; input: unknown }>>(new Map());
+
+  const needsApprovalLookup = useCallback((toolName: string): boolean => {
+    const registered = toolRegistry.getState().getById(toolName);
+    if (registered) return registered.needsApproval ?? false;
+    const builtIn = (builtInTools as readonly BuiltInToolDefinition[]).find((t) => t.id === toolName);
+    return builtIn?.needsApproval ?? false;
+  }, []);
 
   const handleToolCall = useCallback(async (toolName: string, toolCallId: string, input: unknown) => {
     const permissions = runtimeStore.getState().permissions;
+    const result = await executeTool({ toolId: toolName, toolCallId, input, permissions });
 
-    const result = await executeTool({
-      toolId: toolName,
-      toolCallId,
-      input,
-      permissions,
-    });
-
-    // __builtin__ signals the React layer must handle DOM execution
-    if (result.output === "__builtin__") {
-      return await executeBuiltIn(toolName, input);
+    if (!result.ok) {
+      addToolOutputRef.current?.({
+        tool: toolName,
+        toolCallId,
+        state: "output-error",
+        errorText: result.error,
+      });
+      return;
     }
 
-    if (result.error) return { error: result.error };
-    return result.output;
+    addToolOutputRef.current?.({
+      tool: toolName,
+      toolCallId,
+      output: result.output,
+    });
   }, []);
 
   const chat = useChat({
@@ -113,9 +127,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     onToolCall: async ({ toolCall }) => {
       const call = toolCall as { toolName: string; toolCallId: string; input: unknown };
 
-      // Skip tools that need user approval — rendered inline by the UI
-      const registryTool = toolRegistry.getState().getById(call.toolName);
-      if (registryTool?.needsApproval) {
+      if (needsApprovalLookup(call.toolName)) {
         pendingToolCallsRef.current.set(call.toolCallId, {
           toolName: call.toolName,
           input: call.input,
@@ -123,24 +135,14 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
         return;
       }
 
-      const output = await handleToolCall(call.toolName, call.toolCallId, call.input);
-      addToolOutputRef.current?.({
-        tool: call.toolName,
-        toolCallId: call.toolCallId,
-        output,
-      });
+      await handleToolCall(call.toolName, call.toolCallId, call.input);
     },
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
 
-  // Keep ref pointing at the latest addToolOutput after each render
-  addToolOutputRef.current = chat.addToolOutput as (params: {
-    tool: string;
-    toolCallId: string;
-    output?: unknown;
-    state?: "output-error" | "output-available";
-    errorText?: string;
-  }) => void;
+  useEffect(() => {
+    addToolOutputRef.current = chat.addToolOutput as AddToolOutputFn;
+  }, [chat.addToolOutput]);
 
   const sendMessage = useCallback(
     (text: string) => {
@@ -154,8 +156,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
       const pending = pendingToolCallsRef.current.get(toolCallId);
       if (!pending) return;
       pendingToolCallsRef.current.delete(toolCallId);
-      const output = await handleToolCall(pending.toolName, toolCallId, pending.input);
-      addToolOutputRef.current?.({ tool: pending.toolName, toolCallId, output });
+      await handleToolCall(pending.toolName, toolCallId, pending.input);
     },
     [handleToolCall],
   );
@@ -164,7 +165,12 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     const pending = pendingToolCallsRef.current.get(toolCallId);
     if (!pending) return;
     pendingToolCallsRef.current.delete(toolCallId);
-    addToolOutputRef.current?.({ tool: pending.toolName, toolCallId, output: { denied: true } });
+    addToolOutputRef.current?.({
+      tool: pending.toolName,
+      toolCallId,
+      state: "output-error",
+      errorText: "Denied by user",
+    });
   }, []);
 
   return {

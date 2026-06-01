@@ -1,19 +1,22 @@
 import { useEffect, useRef } from "react";
 import { runtimeStore } from "@intentctrl/core";
 
-// Merges component-level data into the runtime dataContext on every change
 export function useDataContext(data: Record<string, unknown>): void {
   const prevRef = useRef<Record<string, unknown>>({});
 
   useEffect(() => {
     const prev = prevRef.current;
+    const prevKeys = new Set(Object.keys(prev));
+    const myAddedKeys: string[] = [];
+    for (const key of Object.keys(data)) {
+      if (!prevKeys.has(key)) myAddedKeys.push(key);
+    }
+
     prevRef.current = data;
 
-    // Merge new data into existing context, remove keys that disappeared
     const current = runtimeStore.getState().dataContext;
     const next: Record<string, unknown> = { ...current };
 
-    // Remove keys from previous call that are no longer present
     for (const key of Object.keys(prev)) {
       if (!(key in data)) delete next[key];
     }
@@ -22,14 +25,11 @@ export function useDataContext(data: Record<string, unknown>): void {
     runtimeStore.getState().setDataContext(next);
 
     return () => {
-      // Remove this component's keys on unmount
-      const onUnmount = { ...runtimeStore.getState().dataContext };
-      for (const key of Object.keys(data)) {
-        delete onUnmount[key];
-      }
-      runtimeStore.getState().setDataContext(onUnmount);
+      if (myAddedKeys.length === 0) return;
+      const ctx = runtimeStore.getState().dataContext;
+      const cleaned: Record<string, unknown> = { ...ctx };
+      for (const key of myAddedKeys) delete cleaned[key];
+      runtimeStore.getState().setDataContext(cleaned);
     };
-    // data object reference changes handled by deep-ish comparison below
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(data)]);
 }

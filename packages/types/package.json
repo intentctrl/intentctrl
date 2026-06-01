@@ -12,10 +12,14 @@
     "lint": "eslint src/",
     "check-types": "tsc --noEmit"
   },
+  "peerDependencies": {
+    "ai": "^6.0.0"
+  },
   "devDependencies": {
     "@intentctrl/eslint-config": "workspace:*",
     "@intentctrl/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
+    "ai": "^6.0.191",
     "eslint": "^9.39.1",
     "typescript": "5.9.2"
   }

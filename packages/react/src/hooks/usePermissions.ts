@@ -1,8 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { runtimeStore } from "@intentctrl/core";
-import type { RuntimePermissions } from "@intentctrl/types";
+import type { RuntimePermissions } from "@intentctrl/core";
 
-// Returns current permissions and a setter from the runtime store
 export function usePermissions(): {
   permissions: RuntimePermissions;
   setPermissions: (p: RuntimePermissions) => void;
