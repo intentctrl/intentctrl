@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { ChatAddToolApproveResponseFunction, UIMessage, ChatStatus } from "ai";
+import type { UIMessage, ChatStatus } from "ai";
 
 export interface IntentCtrlContextValue {
   messages: UIMessage[];
@@ -9,7 +9,6 @@ export interface IntentCtrlContextValue {
   isOpen: boolean;
   setIsOpen: (v: boolean) => void;
   error?: string;
-  addToolApprovalResponse: ChatAddToolApproveResponseFunction;
   approveToolCall: (toolCallId: string) => Promise<void>;
   denyToolCall: (toolCallId: string) => void;
 }

@@ -4,7 +4,7 @@ import { useRef, useCallback, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
-import type { ChatAddToolApproveResponseFunction, UIMessage } from "ai";
+import type { ChatAddToolOutputFunction, UIMessage } from "ai";
 import {
   buildSemanticGraph,
   toolRegistry,
@@ -14,14 +14,7 @@ import {
   serializeTool,
 } from "@intentctrl/core";
 import type { BuiltInToolDefinition } from "@intentctrl/core";
-import type { ApiResponse, IntentCtrlRequestBody, SerializedTool } from "@intentctrl/types";
-
-const apiFetch: typeof globalThis.fetch = async (url, init) => {
-  const res = await fetch(url, init);
-  if (res.ok) return res;
-  const body = (await res.json()) as ApiResponse<unknown>;
-  throw new Error(body.message ?? "Request failed");
-};
+import type { IntentCtrlRequest, SerializedTool } from "@intentctrl/types";
 
 let cachedSerializedTools: { version: number; tools: SerializedTool[] } | null = null;
 
@@ -52,36 +45,31 @@ export interface UseIntentCtrlChatReturn {
   status: "submitted" | "streaming" | "ready" | "error";
   stop: () => void;
   error?: string;
-  addToolApprovalResponse: ChatAddToolApproveResponseFunction;
   approveToolCall: (toolCallId: string) => Promise<void>;
   denyToolCall: (toolCallId: string) => void;
 }
 
-type AddToolOutputFn = (params: {
-  tool: string;
-  toolCallId: string;
-  output?: unknown;
-  state?: "output-error" | "output-available";
-  errorText?: string;
-}) => void;
-
 export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrlChatReturn {
-  const addToolOutputRef = useRef<AddToolOutputFn | null>(null);
+  const addToolOutputRef = useRef<ChatAddToolOutputFunction<UIMessage> | null>(null);
 
   const transportRef = useRef<DefaultChatTransport<UIMessage> | null>(null);
   if (!transportRef.current) {
     transportRef.current = new DefaultChatTransport<UIMessage>({
       api: apiUrl,
-      fetch: apiFetch,
       headers: () => ({
-        Authorization: `Bearer ${apiKey}`,
+        "x-api-key": apiKey,
       }),
-      body: (): IntentCtrlRequestBody => ({
-        semanticContext: buildSemanticGraph(),
-        tools: getSerializedToolsCached(),
-        dataContext: runtimeStore.getState().dataContext,
-        permissions: runtimeStore.getState().permissions,
-      }),
+      prepareSendMessagesRequest({ messages }) {
+        return {
+          body: {
+            messages: messages,
+            semanticContext: buildSemanticGraph(),
+            tools: getSerializedToolsCached(),
+            dataContext: runtimeStore.getState().dataContext,
+            permissions: runtimeStore.getState().permissions,
+          } as IntentCtrlRequest,
+        };
+      },
     });
   }
 
@@ -91,7 +79,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     });
   }, []);
 
-  const pendingToolCallsRef = useRef<Map<string, { toolName: string; input: unknown }>>(new Map());
+  const pendingApprovalsRef = useRef<Map<string, { toolName: string; toolCallId: string; input: unknown }>>(new Map());
 
   const needsApprovalLookup = useCallback((toolName: string): boolean => {
     const registered = toolRegistry.getState().getById(toolName);
@@ -125,24 +113,27 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     transport: transportRef.current,
     experimental_throttle: 50,
     onToolCall: async ({ toolCall }) => {
-      const call = toolCall as { toolName: string; toolCallId: string; input: unknown };
+      const call = toolCall;
 
       if (needsApprovalLookup(call.toolName)) {
-        pendingToolCallsRef.current.set(call.toolCallId, {
+        // Store it and don't execute - wait for user approval
+        pendingApprovalsRef.current.set(call.toolCallId, {
           toolName: call.toolName,
+          toolCallId: call.toolCallId,
           input: call.input,
         });
         return;
       }
 
+      // Auto-execute tools that don't need approval
       await handleToolCall(call.toolName, call.toolCallId, call.input);
     },
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
 
   useEffect(() => {
-    addToolOutputRef.current = chat.addToolOutput as AddToolOutputFn;
-  }, [chat.addToolOutput]);
+    addToolOutputRef.current = chat.addToolOutput;
+  }, [chat.addToolOutput, chat.addToolApprovalResponse]);
 
   const sendMessage = useCallback(
     (text: string) => {
@@ -153,23 +144,25 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
 
   const approveToolCall = useCallback(
     async (toolCallId: string) => {
-      const pending = pendingToolCallsRef.current.get(toolCallId);
+      const pending = pendingApprovalsRef.current.get(toolCallId);
       if (!pending) return;
-      pendingToolCallsRef.current.delete(toolCallId);
+
+      pendingApprovalsRef.current.delete(toolCallId);
       await handleToolCall(pending.toolName, toolCallId, pending.input);
     },
     [handleToolCall],
   );
 
   const denyToolCall = useCallback((toolCallId: string) => {
-    const pending = pendingToolCallsRef.current.get(toolCallId);
+    const pending = pendingApprovalsRef.current.get(toolCallId);
     if (!pending) return;
-    pendingToolCallsRef.current.delete(toolCallId);
+
+    pendingApprovalsRef.current.delete(toolCallId);
     addToolOutputRef.current?.({
       tool: pending.toolName,
       toolCallId,
       state: "output-error",
-      errorText: "Denied by user",
+      errorText: "User denied execution",
     });
   }, []);
 
@@ -179,7 +172,6 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     status: chat.status,
     stop: chat.stop,
     error: chat.error?.message,
-    addToolApprovalResponse: chat.addToolApprovalResponse,
     approveToolCall,
     denyToolCall,
   };

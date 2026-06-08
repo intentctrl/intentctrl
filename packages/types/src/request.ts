@@ -9,5 +9,3 @@ export interface IntentCtrlRequest {
   dataContext?: Record<string, unknown>;
   permissions?: Record<string, boolean | undefined>;
 }
-
-export type IntentCtrlRequestBody = Omit<IntentCtrlRequest, "messages">;

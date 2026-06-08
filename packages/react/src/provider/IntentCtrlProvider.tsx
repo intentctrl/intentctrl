@@ -6,7 +6,7 @@ import type { RuntimePermissions } from "@intentctrl/core";
 import { IntentCtrlContext } from "./context";
 import { useIntentCtrlChat } from "../adapters/ai-sdk";
 
-const DEFAULT_API_URL = "http://localhost:4000/intent/chat";
+const DEFAULT_API_URL = "http://localhost:4000/api/intent";
 
 export interface IntentCtrlProviderProps {
   apiUrl?: string;
@@ -26,7 +26,6 @@ export function IntentCtrlProvider({
   children,
 }: IntentCtrlProviderProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const inited = useRef(false);
 
   useEffect(() => {
     runtimeStore.getState().setPermissions(permissions);
@@ -59,7 +58,6 @@ export function IntentCtrlProvider({
         isOpen,
         setIsOpen,
         error: chat.error,
-        addToolApprovalResponse: chat.addToolApprovalResponse,
         approveToolCall: chat.approveToolCall,
         denyToolCall: chat.denyToolCall,
       }}
