@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { runtimeStore } from "@intentctrl/core";
 import type { RuntimePermissions } from "@intentctrl/core";
 import { IntentCtrlContext } from "./context";
@@ -60,6 +60,8 @@ export function IntentCtrlProvider({
         error: chat.error,
         approveToolCall: chat.approveToolCall,
         denyToolCall: chat.denyToolCall,
+        initSession: chat.initSession,
+        sessions: chat.sessions,
       }}
     >
       {children}

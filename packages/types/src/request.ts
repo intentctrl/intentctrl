@@ -3,7 +3,7 @@ import type { SemanticGraph } from "./semantic";
 import type { SerializedTool } from "./tools";
 
 export interface IntentCtrlRequest {
-  messages: UIMessage[];
+  message: UIMessage;
   semanticContext: SemanticGraph;
   tools: SerializedTool[];
   dataContext?: Record<string, unknown>;

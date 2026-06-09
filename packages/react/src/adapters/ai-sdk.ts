@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import type { ChatAddToolOutputFunction, UIMessage } from "ai";
 import {
@@ -12,9 +11,15 @@ import {
   executeTool,
   runtimeStore,
   serializeTool,
+  getOrCreateVisitorId,
+  getOrCreateActiveSession,
+  fetchSessions,
+  fetchSessionMessages,
+  saveActiveSessionId,
+  getActiveSessionId,
 } from "@intentctrl/core";
 import type { BuiltInToolDefinition } from "@intentctrl/core";
-import type { IntentCtrlRequest, SerializedTool } from "@intentctrl/types";
+import type { IntentCtrlRequest, PaginatedChatSessionsResponse, SerializedTool } from "@intentctrl/types";
 
 let cachedSerializedTools: { version: number; tools: SerializedTool[] } | null = null;
 
@@ -41,33 +46,52 @@ function getSerializedToolsCached(): SerializedTool[] {
 
 export interface UseIntentCtrlChatReturn {
   messages: UIMessage[];
-  sendMessage: (text: string) => void;
+  sendMessage: (text: string) => Promise<void>;
   status: "submitted" | "streaming" | "ready" | "error";
   stop: () => void;
   error?: string;
   approveToolCall: (toolCallId: string) => Promise<void>;
   denyToolCall: (toolCallId: string) => void;
+  initSession: (sessionId?: string) => Promise<void>;
+  sessions: () => Promise<PaginatedChatSessionsResponse>;
 }
 
 export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrlChatReturn {
+  const apiUrlRef = useRef(apiUrl);
+  const apiKeyRef = useRef(apiKey);
+  useEffect(() => {
+    apiUrlRef.current = apiUrl;
+  }, [apiUrl]);
+  useEffect(() => {
+    apiKeyRef.current = apiKey;
+  }, [apiKey]);
+
+  const [sessionId, setSessionId] = useState("");
+  const sessionIdRef = useRef(sessionId);
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
   const addToolOutputRef = useRef<ChatAddToolOutputFunction<UIMessage> | null>(null);
+  const setMessagesRef = useRef<((msgs: UIMessage[]) => void) | null>(null);
 
   const transportRef = useRef<DefaultChatTransport<UIMessage> | null>(null);
   if (!transportRef.current) {
     transportRef.current = new DefaultChatTransport<UIMessage>({
-      api: apiUrl,
+      api: apiUrlRef.current,
       headers: () => ({
-        "x-api-key": apiKey,
+        "x-api-key": apiKeyRef.current,
       }),
-      prepareSendMessagesRequest({ messages }) {
+      prepareSendMessagesRequest: ({ messages }) => {
         return {
           body: {
-            messages: messages,
+            message: messages.at(-1),
             semanticContext: buildSemanticGraph(),
             tools: getSerializedToolsCached(),
             dataContext: runtimeStore.getState().dataContext,
             permissions: runtimeStore.getState().permissions,
           } as IntentCtrlRequest,
+          api: `${apiUrlRef.current}/${sessionIdRef.current}`,
         };
       },
     });
@@ -76,6 +100,14 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   useEffect(() => {
     return toolRegistry.subscribe(() => {
       cachedSerializedTools = null;
+    });
+  }, []);
+
+  useEffect(() => {
+    getActiveSessionId().then((storedId) => {
+      if (storedId) {
+        initSession(storedId);
+      }
     });
   }, []);
 
@@ -109,7 +141,29 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     });
   }, []);
 
+  const initSession = useCallback(
+    async (id?: string) => {
+      const visitorId = await getOrCreateVisitorId();
+      let targetId = id;
+
+      if (!targetId) {
+        const session = await getOrCreateActiveSession(apiUrl, apiKey);
+        if (!session) return;
+        targetId = session.id;
+      } else {
+        await saveActiveSessionId(targetId);
+      }
+
+      sessionIdRef.current = targetId;
+      setSessionId(targetId);
+      const messages = await fetchSessionMessages(apiUrl, apiKey, targetId, visitorId);
+      setMessagesRef.current?.(messages as UIMessage[]);
+    },
+    [apiUrl, apiKey],
+  );
+
   const chat = useChat({
+    id: sessionId,
     transport: transportRef.current,
     experimental_throttle: 50,
     onToolCall: async ({ toolCall }) => {
@@ -129,17 +183,22 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
       await handleToolCall(call.toolName, call.toolCallId, call.input);
     },
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    onError: (error: Error) => {
+      console.error(error.message);
+    },
   });
 
-  useEffect(() => {
-    addToolOutputRef.current = chat.addToolOutput;
-  }, [chat.addToolOutput, chat.addToolApprovalResponse]);
+  addToolOutputRef.current = chat.addToolOutput;
+  setMessagesRef.current = chat.setMessages;
 
   const sendMessage = useCallback(
-    (text: string) => {
+    async (text: string) => {
+      if (!sessionIdRef.current) {
+        await initSession();
+      }
       chat.sendMessage({ text });
     },
-    [chat.sendMessage],
+    [chat.sendMessage, initSession],
   );
 
   const approveToolCall = useCallback(
@@ -166,6 +225,11 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     });
   }, []);
 
+  const sessions = useCallback(async () => {
+    const visitorId = await getOrCreateVisitorId();
+    return fetchSessions(apiUrl, apiKey, visitorId);
+  }, [apiUrl, apiKey]);
+
   return {
     messages: chat.messages,
     sendMessage,
@@ -174,5 +238,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     error: chat.error?.message,
     approveToolCall,
     denyToolCall,
+    initSession,
+    sessions,
   };
 }
