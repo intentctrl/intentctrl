@@ -177,6 +177,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
    */
   const switchSession = useCallback(
     async (sessionId: string) => {
+      if (sessionId === activeSessionIdRef.current) return;
       setInitState("loading");
       try {
         await activateSessionId(sessionId);

@@ -60,8 +60,10 @@ export function IntentCtrlProvider({
         error: chat.error,
         approveToolCall: chat.approveToolCall,
         denyToolCall: chat.denyToolCall,
-        initSession: chat.initSession,
-        sessions: chat.sessions,
+        switchSession: chat.switchSession,
+        newSession: chat.newSession,
+        refreshSessions: chat.refreshSessions,
+        session: chat.session,
       }}
     >
       {children}
