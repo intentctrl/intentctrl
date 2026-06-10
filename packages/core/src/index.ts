@@ -27,4 +27,4 @@ export { runtimeStore } from './store/runtime-store'
 export { serializeSchema, serializeTool } from './serialization/schema-serializer'
 
 // session
-export { getOrCreateVisitorId, getActiveSessionId, saveActiveSessionId, fetchSessions, fetchSessionMessages, getOrCreateActiveSession, createSession } from './services/chat-session'
+export { getOrCreateVisitorId, getActiveSessionId, saveActiveSessionId, fetchSessions, EMPTY_SESSIONS, fetchSessionMessages, createSession } from './services/chat-session'
