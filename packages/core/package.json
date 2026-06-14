@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@intentctrl/types": "workspace:*",
-    "uuid": "^14.0.0",
     "zustand": "^5.0.0"
   },
   "peerDependencies": {

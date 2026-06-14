@@ -8,15 +8,15 @@ export function compressNodes(nodes: SemanticNode[]): SemanticNode[] {
   // Filter out low-importance nodes
   let filtered = nodes.filter((n) => n.importance >= MIN_IMPORTANCE);
 
-  // Deduplicate by label — keep highest importance per label
-  const byLabel = new Map<string, SemanticNode>();
+  // Deduplicate by id — keep highest importance per id
+  const byId = new Map<string, SemanticNode>();
   for (const node of filtered) {
-    const existing = byLabel.get(node.label);
+    const existing = byId.get(node.id);
     if (!existing || node.importance > existing.importance) {
-      byLabel.set(node.label, node);
+      byId.set(node.id, node);
     }
   }
-  filtered = Array.from(byLabel.values());
+  filtered = Array.from(byId.values());
 
   // Sort: annotated first, then by importance descending
   filtered.sort((a, b) => {

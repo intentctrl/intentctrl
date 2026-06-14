@@ -16,7 +16,7 @@ export const builtInSchemas = {
   }),
   type: z.object({
     field: z.string().describe("Accessible label of input field"),
-    value: z.string().describe("Value to type into the field"),
+    value: z.string().max(10_000).describe("Value to type into the field"),
   }),
   highlight: z.object({
     region: z.string().describe("Region label or data-ai-region value"),
@@ -30,10 +30,29 @@ export const builtInSchemas = {
 } as const;
 
 export const builtInTools = [
-  { id: "navigate", description: "Navigate to a route in the application", inputSchema: builtInSchemas.navigate },
-  { id: "click", description: "Click a button or interactive element by its label", inputSchema: builtInSchemas.click },
-  { id: "type", description: "Type a value into an input field", inputSchema: builtInSchemas.type },
-  { id: "highlight", description: "Visually highlight a page region to guide the user", inputSchema: builtInSchemas.highlight },
+  {
+    id: "navigate",
+    description: "Navigate to a route in the application",
+    inputSchema: builtInSchemas.navigate,
+    needsApproval: true,
+  },
+  {
+    id: "click",
+    description: "Click a button or interactive element by its label",
+    inputSchema: builtInSchemas.click,
+    needsApproval: true,
+  },
+  {
+    id: "type",
+    description: "Type a value into an input field",
+    inputSchema: builtInSchemas.type,
+    needsApproval: true,
+  },
+  {
+    id: "highlight",
+    description: "Visually highlight a page region to guide the user",
+    inputSchema: builtInSchemas.highlight,
+  },
   { id: "scroll", description: "Scroll a specific element or region into view", inputSchema: builtInSchemas.scroll },
   { id: "extract", description: "Read the current value of a field or element", inputSchema: builtInSchemas.extract },
 ] as const satisfies readonly BuiltInToolDefinition[];

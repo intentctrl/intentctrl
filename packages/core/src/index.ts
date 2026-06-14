@@ -10,7 +10,7 @@ export type { BuiltInToolName, BuiltInSchemas, BuiltInToolInput, RuntimePermissi
 
 // executor
 export { executeTool } from './executor/tool-executor'
-export { isPermitted } from './executor/permission-guard'
+export { isPermitted, checkPermission } from './executor/permission-guard'
 export type { ExecuteToolParams, ExecuteToolResult } from './executor/tool-executor'
 
 // built-in DOM execution

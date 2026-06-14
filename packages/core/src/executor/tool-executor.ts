@@ -10,9 +10,17 @@ export interface ExecuteToolParams {
   permissions: RuntimePermissions;
 }
 
-export type ExecuteToolResult =
-  | { ok: true; output: unknown }
-  | { ok: false; error: string; retryable?: boolean };
+export type ExecuteToolResult = { ok: true; output: unknown } | { ok: false; error: string; retryable?: boolean };
+
+const TOOL_TIMEOUT_MS = 15_000;
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, toolId: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Tool "${toolId}" timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 export async function executeTool(params: ExecuteToolParams): Promise<ExecuteToolResult> {
   const { toolId, input, permissions } = params;
@@ -42,7 +50,7 @@ export async function executeTool(params: ExecuteToolParams): Promise<ExecuteToo
   }
 
   try {
-    const output = await registryTool.handler(parsed.data);
+    const output = await withTimeout(registryTool.handler(parsed.data), TOOL_TIMEOUT_MS, toolId);
     return { ok: true, output };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Tool execution failed";

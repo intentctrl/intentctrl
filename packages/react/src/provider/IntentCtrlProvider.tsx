@@ -31,20 +31,24 @@ export function IntentCtrlProvider({
     runtimeStore.getState().setPermissions(permissions);
   }, [permissions]);
 
+  const dataContextKey = JSON.stringify(dataContext);
+
   useEffect(() => {
     if (dataContext === EMPTY) return;
-    const addedKeys = Object.keys(dataContext);
+    const snapshot = { ...dataContext };
+    const keys = Object.keys(snapshot);
 
     const current = runtimeStore.getState().dataContext;
-    runtimeStore.getState().setDataContext({ ...current, ...dataContext });
+    runtimeStore.getState().setDataContext({ ...current, ...snapshot });
 
     return () => {
       const ctx = runtimeStore.getState().dataContext;
       const cleaned: Record<string, unknown> = { ...ctx };
-      for (const key of addedKeys) delete cleaned[key];
+      for (const key of keys) delete cleaned[key];
       runtimeStore.getState().setDataContext(cleaned);
     };
-  }, [dataContext]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataContextKey]);
 
   const chat = useIntentCtrlChat(apiUrl, apiKey);
 

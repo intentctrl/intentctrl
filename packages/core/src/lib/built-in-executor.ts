@@ -3,6 +3,12 @@ import { builtInSchemas, builtInTools } from "../registry/built-in-tools";
 
 type EditableElement = HTMLInputElement | HTMLTextAreaElement;
 
+const MAX_TYPE_LENGTH = 10_000;
+
+function sanitizeTypeValue(value: string): string {
+  return value.replace(/\0/g, "").slice(0, MAX_TYPE_LENGTH);
+}
+
 function isEditable(el: Element): el is EditableElement {
   return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
 }
@@ -68,24 +74,24 @@ export async function executeBuiltIn(toolName: string, input: unknown): Promise<
       const el = findByLabel(field);
       if (!el) throw new Error(`Field not found: "${field}"`);
       if (!isEditable(el)) throw new Error(`Element is not editable: "${field}"`);
-      setNativeEditableValue(el, value);
+      setNativeEditableValue(el, sanitizeTypeValue(value));
       return { success: true };
     }
 
     case "highlight": {
       const { region } = builtInSchemas.highlight.parse(input);
       const el = findByRegionOrLabel(region);
-      if (el) {
-        el.setAttribute("data-ai-highlight", "true");
-        setTimeout(() => el.removeAttribute("data-ai-highlight"), 3000);
-      }
+      if (!el) throw new Error(`Region not found: "${region}"`);
+      el.setAttribute("data-ai-highlight", "true");
+      setTimeout(() => el.removeAttribute("data-ai-highlight"), 3000);
       return { success: true };
     }
 
     case "scroll": {
       const { target } = builtInSchemas.scroll.parse(input);
       const el = findByRegionOrLabel(target);
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (!el) throw new Error(`Element not found: "${target}"`);
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
       return { success: true };
     }
 

@@ -1,9 +1,10 @@
-import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 import type {
   ApiResponse,
   ChatSessionResponse,
   CreateChatSessionRequest,
   PaginatedChatSessionsResponse,
+  UIMessage,
 } from "@intentctrl/types";
 import { getItem, setItem, removeItem } from "./storage";
 
@@ -15,7 +16,7 @@ const ACTIVE_SESSION_ID_KEY = "activeSessionId";
 async function getOrCreateVisitorId(): Promise<string> {
   const existing = await getItem(VISITOR_ID_KEY);
   if (existing) return existing;
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   await setItem(VISITOR_ID_KEY, id);
   return id;
 }
@@ -33,6 +34,18 @@ async function saveActiveSessionId(id: string | null): Promise<void> {
 }
 
 // API helpers
+
+const UIMessageShapeSchema = z.array(
+  z
+    .object({
+      id: z.string(),
+      role: z.enum(["system", "user", "assistant", "tool"]),
+      content: z.string(),
+      parts: z.array(z.unknown()),
+      metadata: z.unknown().optional(),
+    })
+    .loose(),
+);
 
 function unwrapData<T>(body: unknown): T {
   return (body as ApiResponse<T>).data as T;
@@ -56,14 +69,17 @@ async function fetchSessions(
   apiUrl: string,
   apiKey: string,
   visitorId: string,
+  signal?: AbortSignal,
 ): Promise<PaginatedChatSessionsResponse> {
   try {
     const res = await fetch(`${apiUrl}/sessions/visitor/${visitorId}`, {
       headers: authHeaders(apiKey),
+      signal,
     });
     if (!res.ok) return EMPTY_SESSIONS;
     return unwrapData(await res.json());
-  } catch {
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") return EMPTY_SESSIONS;
     return EMPTY_SESSIONS;
   }
 }
@@ -73,14 +89,23 @@ async function fetchSessionMessages(
   apiKey: string,
   sessionId: string,
   visitorId: string,
-): Promise<unknown[]> {
+  signal?: AbortSignal,
+): Promise<UIMessage[]> {
   try {
     const res = await fetch(`${apiUrl}/sessions/${sessionId}/messages/${visitorId}`, {
       headers: authHeaders(apiKey),
+      signal,
     });
     if (!res.ok) return [];
-    return unwrapData<unknown[]>(await res.json());
-  } catch {
+    const raw = unwrapData<unknown>(await res.json());
+    const parsed = UIMessageShapeSchema.safeParse(raw);
+    if (!parsed.success) {
+      console.error("[IntentCtrl] Malformed messages from server:", parsed.error.flatten());
+      return [];
+    }
+    return parsed.data as unknown as UIMessage[];
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") return [];
     return [];
   }
 }
@@ -90,20 +115,22 @@ async function createSession(
   apiKey: string,
   visitorId: string,
   externalUserId?: string,
+  signal?: AbortSignal,
 ): Promise<ChatSessionResponse | null> {
-  const sessionId = uuidv4();
   try {
-    const res = await fetch(`${apiUrl}/sessions/create/${sessionId}`, {
+    const res = await fetch(`${apiUrl}/sessions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeaders(apiKey) },
       body: JSON.stringify({ visitorId, externalUserId } satisfies CreateChatSessionRequest),
+      signal,
     });
     if (!res.ok) return null;
     const session = unwrapData<ChatSessionResponse>(await res.json());
     if (!session.id) return null;
     await saveActiveSessionId(session.id);
     return session;
-  } catch {
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") return null;
     return null;
   }
 }

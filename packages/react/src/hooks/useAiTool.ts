@@ -18,5 +18,5 @@ export function useAiTool<TSchema extends ZodType>(tool: RegisteredTool<TSchema>
     };
 
     return registerScoped(scopeId, [stableTool]);
-  }, [scopeId, tool.id]);
+  }, [scopeId, tool.id, tool.description, tool.inputSchema]);
 }

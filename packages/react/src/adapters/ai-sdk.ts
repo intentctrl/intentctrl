@@ -11,6 +11,7 @@ import {
   executeTool,
   runtimeStore,
   serializeTool,
+  checkPermission,
   getOrCreateVisitorId,
   fetchSessions,
   fetchSessionMessages,
@@ -21,27 +22,6 @@ import {
 } from "@intentctrl/core";
 import type { BuiltInToolDefinition } from "@intentctrl/core";
 import type { IntentCtrlRequest, PaginatedChatSessionsResponse, SerializedTool } from "@intentctrl/types";
-
-// Serialized tool cache
-
-let cachedSerializedTools: { version: number; tools: SerializedTool[] } | null = null;
-
-function computeSerializedTools(): SerializedTool[] {
-  const registered = toolRegistry.getState().getAll().map(serializeTool);
-  const registeredIds = new Set(registered.map((t) => t.id));
-  const builtInSerialized: SerializedTool[] = (builtInTools as readonly BuiltInToolDefinition[])
-    .filter((t) => !registeredIds.has(t.id))
-    .map((t) => serializeTool(t));
-  return [...registered, ...builtInSerialized];
-}
-
-function getSerializedToolsCached(): SerializedTool[] {
-  const version = toolRegistry.getState().getVersion();
-  if (cachedSerializedTools?.version === version) return cachedSerializedTools.tools;
-  const tools = computeSerializedTools();
-  cachedSerializedTools = { version, tools };
-  return tools;
-}
 
 // Types
 
@@ -92,6 +72,12 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   //   (b) the user sends their first message (lazy creation, ChatGPT-style).
   //
   const activeSessionIdRef = useRef<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+
+  const setActiveSession = useCallback((id: string | null) => {
+    activeSessionIdRef.current = id;
+    setActiveSessionId(id);
+  }, []);
 
   const [sessionList, setSessionList] = useState<PaginatedChatSessionsResponse>(EMPTY_SESSIONS);
   const [initState, setInitState] = useState<SessionInitState>("idle");
@@ -100,6 +86,26 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   const addToolOutputRef = useRef<ChatAddToolOutputFunction<UIMessage> | null>(null);
   const setMessagesRef = useRef<((msgs: UIMessage[]) => void) | null>(null);
   const pendingApprovalsRef = useRef<Map<string, { toolName: string; toolCallId: string; input: unknown }>>(new Map());
+  const sessionCreatingRef = useRef<Promise<void> | null>(null);
+  const serializedToolsCacheRef = useRef<{ version: number; tools: SerializedTool[] } | null>(null);
+
+  // Serialized tools cache (per-hook instance)
+  const computeSerializedTools = useCallback((): SerializedTool[] => {
+    const registered = toolRegistry.getState().getAll().map(serializeTool);
+    const registeredIds = new Set(registered.map((t) => t.id));
+    const builtInSerialized: SerializedTool[] = (builtInTools as readonly BuiltInToolDefinition[])
+      .filter((t) => !registeredIds.has(t.id))
+      .map((t) => serializeTool(t));
+    return [...registered, ...builtInSerialized];
+  }, []);
+
+  const getSerializedToolsCached = useCallback((): SerializedTool[] => {
+    const version = toolRegistry.getState().getVersion();
+    if (serializedToolsCacheRef.current?.version === version) return serializedToolsCacheRef.current.tools;
+    const tools = computeSerializedTools();
+    serializedToolsCacheRef.current = { version, tools };
+    return tools;
+  }, [computeSerializedTools]);
 
   // Transport (stable; reads refs at call time)
   const transportRef = useRef<DefaultChatTransport<UIMessage> | null>(null);
@@ -115,7 +121,6 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
           dataContext: runtimeStore.getState().dataContext,
           permissions: runtimeStore.getState().permissions,
         } as IntentCtrlRequest,
-        // activeSessionIdRef is always set before chat.sendMessage() is called.
         api: `${apiUrlRef.current}/${activeSessionIdRef.current}`,
       }),
     });
@@ -124,7 +129,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   useEffect(
     () =>
       toolRegistry.subscribe(() => {
-        cachedSerializedTools = null;
+        serializedToolsCacheRef.current = null;
       }),
     [],
   );
@@ -132,6 +137,10 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   // Helpers
 
   const needsApproval = useCallback((toolName: string): boolean => {
+    const { permitted, bypassApproval } = checkPermission(toolName, runtimeStore.getState().permissions);
+    if (!permitted) return false;
+    if (bypassApproval) return false;
+
     const registered = toolRegistry.getState().getById(toolName);
     if (registered) return registered.needsApproval ?? false;
     return (builtInTools as readonly BuiltInToolDefinition[]).find((t) => t.id === toolName)?.needsApproval ?? false;
@@ -153,15 +162,18 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
 
   // Low-level: activate a session ID + load its messages
 
-  const activateSessionId = useCallback(async (id: string) => {
-    // Persist first so any crash after this still restores the right session.
-    await saveActiveSessionId(id);
-    activeSessionIdRef.current = id;
+  const activateSessionId = useCallback(
+    async (id: string) => {
+      // Persist first so any crash after this still restores the right session.
+      await saveActiveSessionId(id);
+      setActiveSession(id);
 
-    const visitorId = await getOrCreateVisitorId();
-    const messages = await fetchSessionMessages(apiUrlRef.current, apiKeyRef.current, id, visitorId);
-    setMessagesRef.current?.(messages as UIMessage[]);
-  }, []);
+      const visitorId = await getOrCreateVisitorId();
+      const messages = await fetchSessionMessages(apiUrlRef.current, apiKeyRef.current, id, visitorId);
+      setMessagesRef.current?.(messages);
+    },
+    [setActiveSession],
+  );
 
   // Session management
 
@@ -171,6 +183,18 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     setSessionList(data);
   }, []);
 
+  const cancelPendingApprovals = useCallback((reason: string) => {
+    for (const [toolCallId, pending] of pendingApprovalsRef.current) {
+      addToolOutputRef.current?.({
+        tool: pending.toolName,
+        toolCallId,
+        state: "output-error",
+        errorText: reason,
+      });
+    }
+    pendingApprovalsRef.current.clear();
+  }, []);
+
   /**
    * Switch to an existing session by ID.
    * Loads its messages and updates the active session in storage.
@@ -178,6 +202,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   const switchSession = useCallback(
     async (sessionId: string) => {
       if (sessionId === activeSessionIdRef.current) return;
+      cancelPendingApprovals("Session switched — action cancelled");
       setInitState("loading");
       try {
         await activateSessionId(sessionId);
@@ -186,7 +211,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
         setInitState("error");
       }
     },
-    [activateSessionId],
+    [activateSessionId, cancelPendingApprovals],
   );
 
   /**
@@ -194,6 +219,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
    * Does NOT send any message — that's the caller's job.
    */
   const newSession = useCallback(async () => {
+    cancelPendingApprovals("New session started — action cancelled");
     setInitState("loading");
     try {
       const visitorId = await getOrCreateVisitorId();
@@ -210,7 +236,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     } catch {
       setInitState("error");
     }
-  }, [activateSessionId, refreshSessions]);
+  }, [activateSessionId, refreshSessions, cancelPendingApprovals]);
 
   // Bootstrap on mount
   //
@@ -220,19 +246,17 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   //   Either way, always load the sessions list for the sidebar.
   //
   useEffect(() => {
+    const controller = new AbortController();
     let cancelled = false;
 
     async function bootstrap() {
       setInitState("loading");
       try {
-        const visitorId = await getOrCreateVisitorId();
+        const [visitorId, storedId] = await Promise.all([getOrCreateVisitorId(), getActiveSessionId()]);
 
-        // Always fetch the sessions list (sidebar needs it).
-        const sessions = await fetchSessions(apiUrlRef.current, apiKeyRef.current, visitorId);
+        const sessions = await fetchSessions(apiUrlRef.current, apiKeyRef.current, visitorId, controller.signal);
         if (cancelled) return;
         setSessionList(sessions);
-
-        const storedId = await getActiveSessionId();
 
         if (storedId) {
           // Validate it still exists on the server.
@@ -255,6 +279,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     bootstrap();
     return () => {
       cancelled = true;
+      controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -291,8 +316,12 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   const sendMessage = useCallback(
     async (text: string) => {
       if (!activeSessionIdRef.current) {
-        await newSession();
-        // newSession sets activeSessionIdRef.current before returning.
+        if (!sessionCreatingRef.current) {
+          sessionCreatingRef.current = newSession().finally(() => {
+            sessionCreatingRef.current = null;
+          });
+        }
+        await sessionCreatingRef.current;
       }
       chat.sendMessage({ text });
     },
@@ -333,7 +362,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     newSession,
     refreshSessions,
     session: {
-      activeSessionId: activeSessionIdRef.current,
+      activeSessionId,
       sessions: sessionList,
       initState,
     },

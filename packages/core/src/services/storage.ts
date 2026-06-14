@@ -16,18 +16,16 @@ function getDB(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       request.result.createObjectStore(STORE_NAME);
     };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => {
-      dbPromise = null; // allow retry on next call
-      reject(request.error);
-    };
-    // If the DB is unexpectedly closed (e.g. browser clears storage) reset the cache.
     request.onsuccess = () => {
       const db = request.result;
       db.onclose = () => {
         dbPromise = null;
       };
       resolve(db);
+    };
+    request.onerror = () => {
+      dbPromise = null;
+      reject(request.error);
     };
   });
 
