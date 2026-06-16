@@ -7,8 +7,6 @@ export interface IntentCtrlContextValue {
   sendMessage: (text: string) => Promise<void>;
   status: "submitted" | "streaming" | "ready" | "error";
   stop: () => void;
-  isOpen: boolean;
-  setIsOpen: (v: boolean) => void;
   error?: string;
   approveToolCall: (toolCallId: string) => Promise<void>;
   denyToolCall: (toolCallId: string) => void;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { runtimeStore } from "@intentctrl/core";
 import type { RuntimePermissions } from "@intentctrl/core";
 import { IntentCtrlContext } from "./context";
@@ -25,8 +25,6 @@ export function IntentCtrlProvider({
   dataContext = EMPTY,
   children,
 }: IntentCtrlProviderProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   useEffect(() => {
     runtimeStore.getState().setPermissions(permissions);
   }, [permissions]);
@@ -59,8 +57,6 @@ export function IntentCtrlProvider({
         sendMessage: chat.sendMessage,
         status: chat.status,
         stop: chat.stop,
-        isOpen,
-        setIsOpen,
         error: chat.error,
         approveToolCall: chat.approveToolCall,
         denyToolCall: chat.denyToolCall,
