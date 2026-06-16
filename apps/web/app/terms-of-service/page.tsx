@@ -38,12 +38,6 @@ export default function TermsOfServicePage() {
             use the software or site.
           </p>
 
-          <h2 className="font-medium text-foreground text-xl">License</h2>
-          <p>
-            The IntentCtrl SDK is provided under the MIT License. You are free to use, copy, modify, merge, publish,
-            distribute, sublicense, and sell copies of the software, subject to the terms of that license.
-          </p>
-
           <h2 className="font-medium text-foreground text-xl">No Warranty</h2>
           <p>
             The software is provided "as is," without warranty of any kind, express or implied, including but not

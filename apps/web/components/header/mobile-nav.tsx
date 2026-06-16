@@ -1,6 +1,7 @@
-import { cn } from "@/lib/utils";
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Portal, PortalBackdrop } from "@/components/header/portal";
 import { aboutLinks, aboutLinks2, platformLinks } from "@/components/header/nav-links";
 import { LinkItem } from "@/components/header/sheard";
@@ -70,10 +71,9 @@ export function MobileNav() {
               ))}
             </div>
             <div className="mt-5 flex flex-col gap-2">
-              <Button className="w-full" variant="outline">
+              <Link href="https://intentctrl.com/sign-in" className={cn("w-full", buttonVariants({ variant: "default" }))}>
                 Sign In
-              </Button>
-              <Button className="w-full">Get Started</Button>
+              </Link>
             </div>
           </div>
         </Portal>

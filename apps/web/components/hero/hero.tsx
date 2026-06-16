@@ -98,18 +98,29 @@ export function HeroSection() {
         <div className="overflow-hidden *:pointer-events-none *:aspect-video *:select-none">
           <Image
             alt="light app screen"
-            className="dark:hidden"
+            className="dark:hidden blur-md mask-[url('/assets/noise-mask.svg')] mask-cover mask-no-repeat"
             height={720}
-            src="https://storage.efferd.com/screen/dashboard-light.webp"
+            src="/assets/images/dashboard-light.png"
             width={1280}
           />
           <Image
             alt="dark app screen"
-            className="hidden dark:block"
+            className="hidden dark:block blur-md mask-[url('/assets/noise-mask.svg')] mask-cover mask-no-repeat"
             height={720}
-            src="https://storage.efferd.com/screen/dashboard-dark.webp"
+            src="/assets/images/dashboard-dark.png"
             width={1280}
           />
+          <div className="absolute top-3/5 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center">
+            <TextAnimate
+              as="h2"
+              by="word"
+              animation="slideUp"
+              duration={0.6}
+              startOnView
+              once className="text-2xl font-semibold text-foreground md:text-3xl">
+              Cloud platform coming soon.
+            </TextAnimate>
+          </div>
         </div>
         <FullWidthDivider className="-bottom-px" />
       </div>

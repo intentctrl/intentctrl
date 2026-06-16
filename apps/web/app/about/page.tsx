@@ -53,7 +53,7 @@ export default function AboutPage() {
 
           <h2 className="font-medium text-foreground text-xl">Open source</h2>
           <p>
-            The SDK is MIT-licensed and available on{" "}
+            The SDK is open source and available on{" "}
             <Link href="https://github.com/intentctrl/intentctrl" className="text-primary hover:underline">
               GitHub
             </Link>

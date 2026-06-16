@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { DesktopNav } from "@/components/header/desktop-nav";
 import { MobileNav } from "@/components/header/mobile-nav";
 import Link from "next/link";
@@ -23,8 +23,7 @@ export function Header() {
           <DesktopNav />
         </div>
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="outline">Sign In</Button>
-          <Button>Get Started</Button>
+          <Link href="https://intentctrl.com/sign-in" className={cn(buttonVariants({ variant: "default" }))}>Sign In</Link>
         </div>
         <MobileNav />
       </nav>

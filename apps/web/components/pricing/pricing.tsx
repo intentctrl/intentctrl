@@ -1,9 +1,10 @@
 "use client";
+
+import React from "react";
 import { cn } from "@/lib/utils";
 import NumberFlow from "@number-flow/react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { DecorIcon } from "@/components/common/decor-icon";
 import { FullWidthDivider } from "@/components/common/full-width-divider";

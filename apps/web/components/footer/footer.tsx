@@ -1,10 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { IconBrandGithub, IconBrandX } from "@tabler/icons-react";
 import { motion, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 
