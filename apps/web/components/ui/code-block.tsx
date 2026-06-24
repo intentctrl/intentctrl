@@ -1,133 +1,121 @@
-"use client"
+"use client";
 
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { IconCheck, IconCopy } from "@tabler/icons-react"
-import { AnimatePresence, motion } from "motion/react"
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "motion/react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface CodeTab {
-  label: string
-  code: string
-  language?: string
+  label: string;
+  code: string;
+  language?: string;
 }
 
 interface CodeBlockProps {
-  tabs?: CodeTab[]
-  code?: string
-  language?: string
-  className?: string
+  tabs?: CodeTab[];
+  code?: string;
+  language?: string;
+  className?: string;
 }
 
-export function CodeBlock({
-  tabs,
-  code,
-  language = "bash",
-  className,
-}: CodeBlockProps) {
-  const [activeTab, setActiveTab] = useState(0)
-  const [copied, setCopied] = useState(false)
-  const [direction, setDirection] = useState(0)
-  const preRef = useRef<HTMLPreElement>(null)
-  const tabsContainerRef = useRef<HTMLDivElement>(null)
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const [hasOverflow, setHasOverflow] = useState(false)
+export function CodeBlock({ tabs, code, language = "bash", className }: CodeBlockProps) {
+  const [activeTab, setActiveTab] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const [direction, setDirection] = useState(0);
+  const preRef = useRef<HTMLPreElement>(null);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const [indicator, setIndicator] = useState<{
-    left: number
-    width: number
-  } | null>(null)
+    left: number;
+    width: number;
+  } | null>(null);
 
   const measureIndicator = useCallback(() => {
-    const container = tabsContainerRef.current
-    const activeEl = tabRefs.current[activeTab]
+    const container = tabsContainerRef.current;
+    const activeEl = tabRefs.current[activeTab];
 
     if (!container || !activeEl) {
-      return
+      return;
     }
 
-    const containerRect = container.getBoundingClientRect()
-    const tabRect = activeEl.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect();
+    const tabRect = activeEl.getBoundingClientRect();
 
     setIndicator({
       left: tabRect.left - containerRect.left,
       width: tabRect.width,
-    })
-  }, [activeTab])
+    });
+  }, [activeTab]);
 
   const codeContent = useMemo(() => {
     if (tabs && tabs.length > 0) {
-      return tabs
+      return tabs;
     }
     if (code) {
-      return [{ label: language, code, language }]
+      return [{ label: language, code, language }];
     }
-    return []
-  }, [tabs, code, language])
+    return [];
+  }, [tabs, code, language]);
 
-  const currentCode = codeContent[activeTab]?.code || ""
+  const currentCode = codeContent[activeTab]?.code || "";
 
   useLayoutEffect(() => {
     const checkOverflow = () => {
       if (preRef.current) {
-        const hasHorizontalOverflow =
-          preRef.current.scrollWidth > preRef.current.clientWidth
-        setHasOverflow(hasHorizontalOverflow)
+        const hasHorizontalOverflow = preRef.current.scrollWidth > preRef.current.clientWidth;
+        setHasOverflow(hasHorizontalOverflow);
       }
-    }
+    };
 
-    checkOverflow()
-    const resizeObserver = new ResizeObserver(checkOverflow)
+    checkOverflow();
+    const resizeObserver = new ResizeObserver(checkOverflow);
     if (preRef.current) {
-      resizeObserver.observe(preRef.current)
+      resizeObserver.observe(preRef.current);
     }
 
     return () => {
-      resizeObserver.disconnect()
-    }
-  }, [activeTab])
+      resizeObserver.disconnect();
+    };
+  }, [activeTab]);
 
   useLayoutEffect(() => {
-    measureIndicator()
+    measureIndicator();
 
-    const resizeObserver = new ResizeObserver(measureIndicator)
-    const container = tabsContainerRef.current
+    const resizeObserver = new ResizeObserver(measureIndicator);
+    const container = tabsContainerRef.current;
 
     if (container) {
-      resizeObserver.observe(container)
+      resizeObserver.observe(container);
     }
 
     for (const tab of tabRefs.current) {
       if (tab) {
-        resizeObserver.observe(tab)
+        resizeObserver.observe(tab);
       }
     }
 
     return () => {
-      resizeObserver.disconnect()
-    }
-  }, [measureIndicator])
+      resizeObserver.disconnect();
+    };
+  }, [measureIndicator]);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(currentCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    await navigator.clipboard.writeText(currentCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleTabChange = (index: number) => {
-    setDirection(index > activeTab ? 1 : -1)
-    setActiveTab(index)
-  }
+    setDirection(index > activeTab ? 1 : -1);
+    setActiveTab(index);
+  };
 
-  if (codeContent.length === 0) return null
+  if (codeContent.length === 0) return null;
 
   return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-lg border shadow-xs",
-        "bg-card",
-        className
-      )}
-    >
+    <div className={cn("group relative overflow-hidden rounded-lg border shadow-xs", "bg-card", className)}>
       {/* Tab Bar */}
       {codeContent.length > 1 && (
         <div className="border-b">
@@ -139,14 +127,14 @@ export function CodeBlock({
               "overflow-x-auto overflow-y-hidden",
               "scrollbar-thin scrollbar-thumb-rounded",
               "scrollbar-thumb-black/15 hover:scrollbar-thumb-black/20",
-              "dark:scrollbar-thumb-white/20 dark:hover:scrollbar-thumb-white/25"
+              "dark:scrollbar-thumb-white/20 dark:hover:scrollbar-thumb-white/25",
             )}
           >
             {codeContent.map((tab, index) => (
               <button
                 key={`${tab.label}-${index}`}
                 ref={(element) => {
-                  tabRefs.current[index] = element
+                  tabRefs.current[index] = element;
                 }}
                 type="button"
                 role="tab"
@@ -157,9 +145,7 @@ export function CodeBlock({
                   "whitespace-nowrap font-medium transition-colors duration-150",
                   "px-2 py-1 rounded-md",
                   "hover:bg-muted",
-                  activeTab === index
-                    ? "text-foreground"
-                    : "text-muted-foreground"
+                  activeTab === index ? "text-foreground" : "text-muted-foreground",
                 )}
               >
                 {tab.label}
@@ -200,7 +186,7 @@ export function CodeBlock({
             "opacity-0 group-hover:opacity-100",
             "hover:bg-muted hover:text-foreground",
             "transition-all duration-150",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
           )}
           aria-label="Copy code"
         >
@@ -234,29 +220,26 @@ export function CodeBlock({
         <pre
           ref={preRef}
           onClick={() => {
-            const selection = window.getSelection()
-            const range = document.createRange()
-            range.selectNodeContents(preRef.current!)
-            selection?.removeAllRanges()
-            selection?.addRange(range)
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(preRef.current!);
+            selection?.removeAllRanges();
+            selection?.addRange(range);
           }}
           className={cn(
             "cursor-pointer p-4 text-xs leading-relaxed m-0",
             codeContent.length > 1 ? "rounded-b-lg" : "rounded-lg",
             hasOverflow ? "overflow-x-auto" : "overflow-x-hidden",
             hasOverflow && "scrollbar-thin scrollbar-thumb-rounded",
-            hasOverflow &&
-              "scrollbar-thumb-black/15 hover:scrollbar-thumb-black/20",
-            hasOverflow &&
-              "dark:scrollbar-thumb-white/20 dark:hover:scrollbar-thumb-white/25",
+            hasOverflow && "scrollbar-thumb-black/15 hover:scrollbar-thumb-black/20",
+            hasOverflow && "dark:scrollbar-thumb-white/20 dark:hover:scrollbar-thumb-white/25",
             hasOverflow && "[&::-webkit-scrollbar]:h-2",
             hasOverflow && "[&::-webkit-scrollbar-thumb]:rounded-full",
             hasOverflow && "[&::-webkit-scrollbar-thumb]:bg-black/15",
             hasOverflow && "[&::-webkit-scrollbar-thumb]:dark:bg-white/20",
             hasOverflow && "[&::-webkit-scrollbar-thumb:hover]:bg-black/20",
-            hasOverflow &&
-              "[&::-webkit-scrollbar-thumb:hover]:dark:bg-white/25",
-            hasOverflow && "[&::-webkit-scrollbar-track]:bg-transparent"
+            hasOverflow && "[&::-webkit-scrollbar-thumb:hover]:dark:bg-white/25",
+            hasOverflow && "[&::-webkit-scrollbar-track]:bg-transparent",
           )}
         >
           <AnimatePresence mode="wait" initial={false} custom={direction}>
@@ -290,5 +273,5 @@ export function CodeBlock({
         </pre>
       </div>
     </div>
-  )
+  );
 }

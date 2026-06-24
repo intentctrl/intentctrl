@@ -71,7 +71,10 @@ export function MobileNav() {
               ))}
             </div>
             <div className="mt-5 flex flex-col gap-2">
-              <Link href="https://intentctrl.com/sign-in" className={cn("w-full", buttonVariants({ variant: "default" }))}>
+              <Link
+                href="https://intentctrl.com/sign-in"
+                className={cn("w-full", buttonVariants({ variant: "default" }))}
+              >
                 Sign In
               </Link>
             </div>

@@ -1,37 +1,33 @@
-'use client';
-import type { ComponentProps } from 'react';
-import { useI18n } from 'fumadocs-ui/contexts/i18n';
-import { useTranslations } from '@fuma-translate/react';
-import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
-import { cn } from '../../../lib/cn';
-import { buttonVariants } from '../../../components/ui/button';
-import type { VariantProps } from 'class-variance-authority';
+"use client";
+import type { ComponentProps } from "react";
+import { useI18n } from "fumadocs-ui/contexts/i18n";
+import { useTranslations } from "@fuma-translate/react";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
+import { cn } from "../../../lib/cn";
+import { buttonVariants } from "../../../components/ui/button";
+import type { VariantProps } from "class-variance-authority";
 
-export interface LanguageSelectProps extends ComponentProps<'button'> {
-  variant?: VariantProps<typeof buttonVariants>['variant'];
+export interface LanguageSelectProps extends ComponentProps<"button"> {
+  variant?: VariantProps<typeof buttonVariants>["variant"];
 }
 
 export function LanguageSelect({
   className,
-  variant = 'ghost',
+  variant = "ghost",
   children,
   ...rest
 }: LanguageSelectProps): React.ReactElement {
   const context = useI18n();
-  const t = useTranslations({ note: 'language switcher' });
-  if (!context.locales) throw new Error('Missing `<I18nProvider />`');
+  const t = useTranslations({ note: "language switcher" });
+  if (!context.locales) throw new Error("Missing `<I18nProvider />`");
 
-  const chooseLanguage = t('Choose a language');
+  const chooseLanguage = t("Choose a language");
 
   return (
     <Popover>
       <PopoverTrigger
-        aria-label={t('Choose a language', { note: 'aria-label' })}
-        className={cn(
-          buttonVariants({ variant }),
-          'gap-1.5 p-1.5 data-[state=open]:bg-fd-accent',
-          className,
-        )}
+        aria-label={t("Choose a language", { note: "aria-label" })}
+        className={cn(buttonVariants({ variant }), "gap-1.5 p-1.5 data-[state=open]:bg-fd-accent", className)}
         {...rest}
       >
         {children}
@@ -43,10 +39,10 @@ export function LanguageSelect({
             key={item.locale}
             type="button"
             className={cn(
-              'px-2 py-1.5 text-start text-sm rounded-lg transition-colors',
+              "px-2 py-1.5 text-start text-sm rounded-lg transition-colors",
               item.locale === context.locale
-                ? 'bg-fd-primary/10 text-fd-primary'
-                : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',
+                ? "bg-fd-primary/10 text-fd-primary"
+                : "text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground",
             )}
             onClick={() => {
               context.onChange?.(item.locale);
@@ -60,7 +56,7 @@ export function LanguageSelect({
   );
 }
 
-export type LanguageSelectTextProps = ComponentProps<'span'>;
+export type LanguageSelectTextProps = ComponentProps<"span">;
 
 export function LanguageSelectText(props: LanguageSelectTextProps) {
   const { locales, locale } = useI18n();

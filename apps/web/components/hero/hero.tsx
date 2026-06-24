@@ -26,7 +26,10 @@ export function HeroSection() {
           <div className="absolute inset-y-0 right-8 w-px bg-linear-to-b from-transparent via-border/50 to-border/50 md:right-12" />
         </div>
 
-        <Link href="/#usage" className="group mx-auto flex w-fit items-center gap-3 rounded-sm border bg-card p-1 shadow">
+        <Link
+          href="/#usage"
+          className="group mx-auto flex w-fit items-center gap-3 rounded-sm border bg-card p-1 shadow"
+        >
           <div className="rounded-xs border bg-card px-1.5 py-0.5 shadow-sm">
             <p className="font-mono text-xs">NEW</p>
           </div>
@@ -59,10 +62,10 @@ export function HeroSection() {
           duration={0.6}
           startOnView
           once
-          className="text-center max-w-sm text-muted-foreground text-sm wrap-break-word tracking-wider sm:text-lg"
+          className="text-center max-w-sm lg:max-w-lg text-muted-foreground text-sm wrap-break-word tracking-wider sm:text-lg"
         >
-          IntentCtrl is an open-source SDK that adds an AI layer to app. Users can ask questions, get answers, navigate,
-          fill forms, and trigger actions
+          IntentCtrl is an open-source SDK that turns your application into an AI-native experience, enabling users to
+          talk to your app and take actions using natural language.
         </TextAnimate>
 
         <div className="flex flex-col w-full max-w-72 items-center justify-center gap-3 pt-2 z-20">
@@ -117,7 +120,9 @@ export function HeroSection() {
               animation="slideUp"
               duration={0.6}
               startOnView
-              once className="text-2xl font-semibold text-foreground md:text-3xl">
+              once
+              className="text-2xl font-semibold text-foreground md:text-3xl"
+            >
               Cloud platform coming soon.
             </TextAnimate>
           </div>

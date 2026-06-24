@@ -23,7 +23,9 @@ export function Header() {
           <DesktopNav />
         </div>
         <div className="hidden items-center gap-2 md:flex">
-          <Link href="https://intentctrl.com/sign-in" className={cn(buttonVariants({ variant: "default" }))}>Sign In</Link>
+          <Link href="https://intentctrl.com/sign-in" className={cn(buttonVariants({ variant: "default" }))}>
+            Sign In
+          </Link>
         </div>
         <MobileNav />
       </nav>

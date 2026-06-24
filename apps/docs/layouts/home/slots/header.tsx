@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { type ComponentProps, Fragment, useState } from 'react';
-import { cva } from 'class-variance-authority';
-import Link from 'fumadocs-core/link';
-import { cn } from '../../../lib/cn';
-import { type LinkItemType, LinkItem } from '../../shared';
+import { type ComponentProps, Fragment, useState } from "react";
+import { cva } from "class-variance-authority";
+import Link from "fumadocs-core/link";
+import { cn } from "../../../lib/cn";
+import { type LinkItemType, LinkItem } from "../../shared";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,48 +13,46 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   NavigationMenuViewport,
-} from '../../../components/ui/navigation-menu';
-import { buttonVariants } from '../../../components/ui/button';
-import { ChevronDown, Languages } from 'lucide-react';
-import { useIsScrollTop } from 'fumadocs-ui/utils/use-is-scroll-top';
-import { useHomeLayout } from './..';
-import type { NavOptions } from '../../shared';
-import { useTranslations } from '@fuma-translate/react';
+} from "../../../components/ui/navigation-menu";
+import { buttonVariants } from "../../../components/ui/button";
+import { ChevronDown, Languages } from "lucide-react";
+import { useIsScrollTop } from "fumadocs-ui/utils/use-is-scroll-top";
+import { useHomeLayout } from "./..";
+import type { NavOptions } from "../../shared";
+import { useTranslations } from "@fuma-translate/react";
 
-export const navItemVariants = cva('[&_svg]:size-4', {
+export const navItemVariants = cva("[&_svg]:size-4", {
   variants: {
     variant: {
-      main: 'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary',
+      main: "inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary",
       button: buttonVariants({
-        color: 'secondary',
-        className: 'gap-1.5',
+        color: "secondary",
+        className: "gap-1.5",
       }),
       icon: buttonVariants({
-        color: 'ghost',
-        size: 'icon',
+        color: "ghost",
+        size: "icon",
       }),
     },
   },
   defaultVariants: {
-    variant: 'main',
+    variant: "main",
   },
 });
 
-export function Header(props: ComponentProps<'header'>) {
+export function Header(props: ComponentProps<"header">) {
   const {
     navItems,
     menuItems,
     slots,
     props: { nav },
   } = useHomeLayout();
-  const t = useTranslations({ note: 'mobile menu' });
+  const t = useTranslations({ note: "mobile menu" });
   if (nav?.component) return nav.component;
 
   return (
     <HeaderNavigationMenu transparentMode={nav?.transparentMode} {...props}>
-      {slots.navTitle && (
-        <slots.navTitle className="inline-flex items-center gap-2.5 font-semibold" />
-      )}
+      {slots.navTitle && <slots.navTitle className="inline-flex items-center gap-2.5 font-semibold" />}
       {nav?.children}
       <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
         {navItems
@@ -65,10 +63,7 @@ export function Header(props: ComponentProps<'header'>) {
       </ul>
       <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
         {slots.searchTrigger && (
-          <slots.searchTrigger.full
-            hideIfDisabled
-            className="w-full rounded-full ps-2.5 max-w-[240px]"
-          />
+          <slots.searchTrigger.full hideIfDisabled className="w-full rounded-full ps-2.5 max-w-[240px]" />
         )}
         {slots.themeSwitch && <slots.themeSwitch />}
         {slots.languageSelect && (
@@ -80,7 +75,7 @@ export function Header(props: ComponentProps<'header'>) {
           {navItems.filter(isSecondary).map((item, i) => (
             <NavigationMenuLinkItem
               key={i}
-              className={cn(item.type === 'icon' && '-mx-1 first:ms-0 last:me-0')}
+              className={cn(item.type === "icon" && "-mx-1 first:ms-0 last:me-0")}
               item={item}
             />
           ))}
@@ -91,12 +86,12 @@ export function Header(props: ComponentProps<'header'>) {
         <NavigationMenuItem asChild>
           <div>
             <NavigationMenuTrigger
-              aria-label={t('Toggle Menu', { note: 'aria-label' })}
+              aria-label={t("Toggle Menu", { note: "aria-label" })}
               className={cn(
                 buttonVariants({
-                  size: 'icon',
-                  color: 'ghost',
-                  className: 'group [&_svg]:size-5.5',
+                  size: "icon",
+                  color: "ghost",
+                  className: "group [&_svg]:size-5.5",
                 }),
               )}
               onPointerMove={nav?.enableHoverToOpen ? undefined : (e) => e.preventDefault()}
@@ -114,7 +109,7 @@ export function Header(props: ComponentProps<'header'>) {
                   <MobileNavigationMenuLinkItem
                     key={i}
                     item={item}
-                    className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
+                    className={cn(item.type === "icon" && "-mx-1 first:ms-0")}
                   />
                 ))}
                 <div role="separator" className="flex-1" />
@@ -136,29 +131,29 @@ export function Header(props: ComponentProps<'header'>) {
 }
 
 function isSecondary(item: LinkItemType): boolean {
-  if ('secondary' in item && item.secondary != null) return item.secondary;
+  if ("secondary" in item && item.secondary != null) return item.secondary;
 
-  return item.type === 'icon';
+  return item.type === "icon";
 }
 
 function HeaderNavigationMenu({
-  transparentMode = 'none',
+  transparentMode = "none",
   ...props
-}: ComponentProps<'header'> & {
-  transparentMode?: NavOptions['transparentMode'];
+}: ComponentProps<"header"> & {
+  transparentMode?: NavOptions["transparentMode"];
 }) {
-  const [value, setValue] = useState('');
-  const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
-  const isTransparent = transparentMode === 'top' ? isTop : transparentMode === 'always';
+  const [value, setValue] = useState("");
+  const isTop = useIsScrollTop({ enabled: transparentMode === "top" }) ?? true;
+  const isTransparent = transparentMode === "top" ? isTop : transparentMode === "always";
 
   return (
     <NavigationMenu value={value} onValueChange={setValue} asChild>
-      <header id="nd-nav" {...props} className={cn('sticky h-14 top-0 z-40', props.className)}>
+      <header id="nd-nav" {...props} className={cn("sticky h-14 top-0 z-40", props.className)}>
         <div
           className={cn(
-            'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-(--fd-layout-width)',
-            value.length > 0 && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
-            (!isTransparent || value.length > 0) && 'bg-fd-background/80',
+            "backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-(--fd-layout-width)",
+            value.length > 0 && "max-lg:shadow-lg max-lg:rounded-b-2xl",
+            (!isTransparent || value.length > 0) && "bg-fd-background/80",
           )}
         >
           <NavigationMenuList className="flex h-14 w-full items-center px-4" asChild>
@@ -173,11 +168,11 @@ function HeaderNavigationMenu({
 }
 
 function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; className?: string }) {
-  if (item.type === 'custom') return item.children;
+  if (item.type === "custom") return item.children;
 
-  if (item.type === 'menu') {
+  if (item.type === "menu") {
     const children = item.items.map((child, j) => {
-      if (child.type === 'custom') {
+      if (child.type === "custom") {
         return <Fragment key={j}>{child.children}</Fragment>;
       }
 
@@ -195,7 +190,7 @@ function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; classN
             external={child.external}
             {...rest}
             className={cn(
-              'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
+              "flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground",
               rest.className,
             )}
           >
@@ -213,7 +208,7 @@ function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; classN
 
     return (
       <NavigationMenuItem {...props}>
-        <NavigationMenuTrigger className={cn(navItemVariants(), 'rounded-md')}>
+        <NavigationMenuTrigger className={cn(navItemVariants(), "rounded-md")}>
           {item.url ? (
             <Link href={item.url} external={item.external}>
               {item.text}
@@ -234,27 +229,20 @@ function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; classN
       <NavigationMenuLink asChild>
         <LinkItem
           item={item}
-          aria-label={item.type === 'icon' ? item.label : undefined}
+          aria-label={item.type === "icon" ? item.label : undefined}
           className={cn(navItemVariants({ variant: item.type }))}
         >
-          {item.type === 'icon' ? item.icon : item.text}
+          {item.type === "icon" ? item.icon : item.text}
         </LinkItem>
       </NavigationMenuLink>
     </NavigationMenuItem>
   );
 }
 
-function MobileNavigationMenuLinkItem({
-  item,
-  ...props
-}: {
-  item: LinkItemType;
-  className?: string;
-}) {
-  if (item.type === 'custom')
-    return <div className={cn('grid', props.className)}>{item.children}</div>;
+function MobileNavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; className?: string }) {
+  if (item.type === "custom") return <div className={cn("grid", props.className)}>{item.children}</div>;
 
-  if (item.type === 'menu') {
+  if (item.type === "menu") {
     const header = (
       <>
         {item.icon}
@@ -263,7 +251,7 @@ function MobileNavigationMenuLinkItem({
     );
 
     return (
-      <div className={cn('mb-4 flex flex-col', props.className)}>
+      <div className={cn("mb-4 flex flex-col", props.className)}>
         <p className="mb-1 text-sm text-fd-muted-foreground">
           {item.url ? (
             <NavigationMenuLink asChild>
@@ -288,22 +276,22 @@ function MobileNavigationMenuLinkItem({
         item={item}
         className={cn(
           {
-            main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
+            main: "inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4",
             icon: buttonVariants({
-              size: 'icon',
-              color: 'ghost',
+              size: "icon",
+              color: "ghost",
             }),
             button: buttonVariants({
-              color: 'secondary',
-              className: 'gap-1.5 [&_svg]:size-4',
+              color: "secondary",
+              className: "gap-1.5 [&_svg]:size-4",
             }),
-          }[item.type ?? 'main'],
+          }[item.type ?? "main"],
           props.className,
         )}
-        aria-label={item.type === 'icon' ? item.label : undefined}
+        aria-label={item.type === "icon" ? item.label : undefined}
       >
         {item.icon}
-        {item.type === 'icon' ? undefined : item.text}
+        {item.type === "icon" ? undefined : item.text}
       </LinkItem>
     </NavigationMenuLink>
   );

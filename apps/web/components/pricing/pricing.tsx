@@ -25,63 +25,69 @@ type Plan = {
     href: string;
   };
   highlighted?: boolean;
-  comingSoon?: boolean;
 };
 
 const plans: Plan[] = [
   {
     name: "Free",
-    info: "for experimentation",
+    info: "Get started with the open-source SDK and cloud platform",
     price: {
       monthly: 0,
       yearly: 0,
     },
     features: [
       "MIT licensed SDK",
-      "No usage limits",
-      "Runs entirely in the browser",
-      "Built-in DOM tools (navigate, click, type, scroll)",
-      "Custom tool registration",
-      "Permission-checked runtime",
-      "React 19 & Next.js support",
+      "1 cloud project",
+      "1,000 messages/month",
+      "100 requests/day API limit",
+      "Basic analytics",
     ],
     btn: {
-      text: "Start Your Free Trial",
-      href: "#",
+      text: "Get started",
+      href: "https://app.intentctrl.com/sign-up",
     },
   },
   {
     name: "Builder",
-    info: "individual developers",
+    info: "For developers building and testing production apps",
     highlighted: true,
     price: {
-      monthly: 0,
-      yearly: 0,
+      monthly: 10,
+      yearly: 100,
     },
     features: [
-      "Features coming soon",
+      "Everything in Free",
+      "3 cloud projects",
+      "10,000 messages/month",
+      "1,000 requests/day API limit",
+      "Basic analytics",
+      "Early access to upcoming features",
     ],
     btn: {
       text: "Get started",
-      href: "#",
+      href: "https://app.intentctrl.com/sign-up",
     },
-    comingSoon: true,
   },
   {
     name: "Pro",
-    info: "production apps",
+    info: "For larger applications with higher usage limits",
     price: {
-      monthly: 0,
-      yearly: 0,
+      monthly: 30,
+      yearly: 300,
     },
     features: [
-      "Features coming soon",
+      "Everything in Builder",
+      "6 cloud projects",
+      "100,000 messages/month",
+      "10,000 requests/day API limit",
+      "Basic analytics",
+      "Highest usage limits",
+      "Early access to upcoming features",
     ],
     btn: {
-      text: "Contact team",
-      href: "#",
+      text: "Get started",
+      href: "https://app.intentctrl.com/sign-up",
     },
-    comingSoon: true,
   },
 ];
 
@@ -93,12 +99,30 @@ export function PricingSection() {
       <div className="relative">
         <div className="mx-auto flex w-full flex-col items-center space-y-7 p-8">
           <div className="mx-auto max-w-xl space-y-2">
-            <TextAnimate animation="blurIn" as="h2" by="word" className="text-center font-medium text-2xl tracking-tight md:text-3xl lg:text-4xl" duration={0.6} once startOnView>
+            <TextAnimate
+              animation="blurIn"
+              as="h2"
+              by="word"
+              className="text-center font-medium text-2xl tracking-tight md:text-3xl lg:text-4xl"
+              duration={0.6}
+              once
+              startOnView
+            >
               Free and open source while we build.
             </TextAnimate>
-            <TextAnimate animation="blurIn" as="p" by="word" className="text-center text-muted-foreground text-sm md:text-base" delay={0.3} duration={0.6} once startOnView>
-              No account required, no usage limits, no hidden costs. A cloud backend is coming with session history,
-              analytics, and memory. There will always be a free tier.
+            <TextAnimate
+              animation="blurIn"
+              as="p"
+              by="word"
+              className="text-center text-muted-foreground text-sm md:text-base"
+              delay={0.3}
+              duration={0.6}
+              once
+              startOnView
+            >
+              Use the SDK today with no account, no usage limits, and no hidden costs. Self-host the platform for free
+              with unlimited usage, or use our cloud platform as we continue building features like session history,
+              analytics, and memory.
             </TextAnimate>
           </div>
 
@@ -110,6 +134,12 @@ export function PricingSection() {
             <PricingCard frequency={frequency} key={plan.name} plan={plan} />
           ))}
         </div>
+
+        <FullWidthDivider />
+
+        <p className="my-4 text-center text-muted-foreground text-xs">
+          The SDK is open source and free forever. Paid plans apply only to the hosted Cloud platform.
+        </p>
       </div>
       <FullWidthDivider />
     </section>
@@ -184,15 +214,9 @@ export function PricingCard({ plan, className, frequency = "monthly", ...props }
         </h3>
         <p className="mb-2 font-normal text-muted-foreground text-xs">billed {frequency}</p>
 
-        {plan.comingSoon ? (
-          <Button className="mt-4 w-full" disabled variant="outline">
-            Coming soon
-          </Button>
-        ) : (
-          <Button asChild className="mt-4 w-full" variant={plan.highlighted ? "default" : "outline"}>
-            <Link href={plan.btn.href}>{plan.btn.text}</Link>
-          </Button>
-        )}
+        <Button asChild className="mt-4 w-full" variant={plan.highlighted ? "default" : "outline"}>
+          <Link href={plan.btn.href}>{plan.btn.text}</Link>
+        </Button>
       </div>
 
       <div className="space-y-3 px-4 py-6 text-muted-foreground text-sm">

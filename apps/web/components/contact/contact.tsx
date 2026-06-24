@@ -63,12 +63,7 @@ export function ContactSection() {
                 >
                   {item.title}
                 </TextAnimate>
-                <Link
-                  href={item.href}
-                  className="hover:underline"
-                  target="_blank"
-                  rel={"noopener noreferrer"}
-                >
+                <Link href={item.href} className="hover:underline" target="_blank" rel={"noopener noreferrer"}>
                   <TextAnimate
                     animation="blurIn"
                     as="p"

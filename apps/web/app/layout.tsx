@@ -38,7 +38,7 @@ export default function RootLayout({
         fontMono.variable,
         "font-sans",
         "scrollbar-thin scrollbar-track-background scrollbar-thumb-foreground/50",
-        "selection:bg-foreground selection:text-background"
+        "selection:bg-foreground selection:text-background",
       )}
     >
       <body className="min-h-full flex flex-col w-full">

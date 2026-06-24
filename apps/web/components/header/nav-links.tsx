@@ -1,7 +1,13 @@
 import type { LinkItemType } from "@/components/header/sheard";
-import { IconPlug, IconLayoutDashboard, IconUsers, IconFileText, IconShield } from "@tabler/icons-react";
+import { IconPlug, IconLayoutDashboard, IconCloud, IconUsers, IconFileText, IconShield } from "@tabler/icons-react";
 
 export const platformLinks: LinkItemType[] = [
+  {
+    label: "Cloud Platform",
+    href: "https://app.intentctrl.com",
+    description: "Hosted platform with analytics and session history",
+    icon: <IconCloud />,
+  },
   {
     label: "Features",
     href: "/#features",

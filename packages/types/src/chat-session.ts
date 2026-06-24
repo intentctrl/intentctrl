@@ -21,5 +21,3 @@ export interface PaginatedChatSessionsResponse {
   pageIndex: number;
   pageSize: number;
 }
-
-

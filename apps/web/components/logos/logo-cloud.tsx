@@ -120,14 +120,20 @@ function LogoCard({ logo, className, children, ...props }: LogoCardProps) {
       <PixelCanvas gap={6} speed={25} colors={logo.colors} variant="icon" />
       <Image
         alt={logo.alt}
-        className={cn("pointer-events-none relative z-10 h-4 w-auto select-none md:h-5 block dark:hidden", logo.className)}
+        className={cn(
+          "pointer-events-none relative z-10 h-4 w-auto select-none md:h-5 block dark:hidden",
+          logo.className,
+        )}
         height={20}
         src={logo.light}
         width={120}
       />
       <Image
         alt={logo.alt}
-        className={cn("pointer-events-none relative z-10 h-4 w-auto select-none md:h-5 hidden dark:block", logo.className)}
+        className={cn(
+          "pointer-events-none relative z-10 h-4 w-auto select-none md:h-5 hidden dark:block",
+          logo.className,
+        )}
         height={20}
         src={logo.dark}
         width={120}

@@ -1,18 +1,10 @@
-'use client';
-import * as Primitive from 'fumadocs-core/toc';
-import {
-  type ComponentProps,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { cn } from '../../lib/cn';
-import { useTOCItems } from './index';
-import { mergeRefs } from '../../lib/merge-refs';
-import { useTranslations } from '@fuma-translate/react';
+"use client";
+import * as Primitive from "fumadocs-core/toc";
+import { type ComponentProps, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "../../lib/cn";
+import { useTOCItems } from "./index";
+import { mergeRefs } from "../../lib/merge-refs";
+import { useTranslations } from "@fuma-translate/react";
 
 interface ComputedSVG {
   width: number;
@@ -23,7 +15,7 @@ interface ComputedSVG {
   itemLineLengths: [top: number, bottom: number][];
 }
 
-export interface TOCItemsProps extends ComponentProps<'div'> {
+export interface TOCItemsProps extends ComponentProps<"div"> {
   thumbBox?: boolean;
 }
 
@@ -41,7 +33,7 @@ export function TOCItems({ ref, className, thumbBox = true, children, ...props }
     }
     let w = 0;
     let h = 0;
-    let d = '';
+    let d = "";
     const positions: [top: number, bottom: number, x: number][] = [];
     const output: ReactNode[] = [];
 
@@ -87,15 +79,13 @@ export function TOCItems({ ref, className, thumbBox = true, children, ...props }
       positions.push([top, bottom, x]);
     }
 
-    output.unshift(
-      <path key="path" d={d} className="stroke-fd-primary" strokeWidth="1" fill="none" />,
-    );
+    output.unshift(<path key="path" d={d} className="stroke-fd-primary" strokeWidth="1" fill="none" />);
 
     const itemLineLengths: [top: number, bottom: number][] = [];
 
     if (thumbBox) {
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', d);
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", d);
 
       const n = path.getTotalLength();
       for (let i = 0; i < positions.length; i++) {
@@ -131,11 +121,7 @@ export function TOCItems({ ref, className, thumbBox = true, children, ...props }
   }, [onPrint]);
 
   return (
-    <div
-      ref={mergeRefs(containerRef, ref)}
-      className={cn('relative flex flex-col', className)}
-      {...props}
-    >
+    <div ref={mergeRefs(containerRef, ref)} className={cn("relative flex flex-col", className)} {...props}>
       {svg && <ThumbTrack computed={svg} thumbBox={thumbBox} />}
       {children}
     </div>
@@ -143,13 +129,9 @@ export function TOCItems({ ref, className, thumbBox = true, children, ...props }
 }
 
 export function TOCEmpty() {
-  const t = useTranslations({ note: 'table of contents' });
+  const t = useTranslations({ note: "table of contents" });
 
-  return (
-    <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-      {t('No Headings')}
-    </div>
-  );
+  return <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">{t("No Headings")}</div>;
 }
 
 interface ThumbBoxInfo {
@@ -169,8 +151,8 @@ function ThumbTrack({ computed, thumbBox }: { computed: ComputedSVG; thumbBox: b
     if (startIdx === -1) return out;
 
     const endIdx = items.findLastIndex((item) => item.active);
-    out['--track-top'] = `${computed.positions[startIdx][0]}px`;
-    out['--track-bottom'] = `${computed.positions[endIdx][1]}px`;
+    out["--track-top"] = `${computed.positions[startIdx][0]}px`;
+    out["--track-bottom"] = `${computed.positions[endIdx][1]}px`;
 
     if (thumbBox) {
       let isUp = false;
@@ -183,10 +165,10 @@ function ThumbTrack({ computed, thumbBox }: { computed: ComputedSVG; thumbBox: b
       }
 
       previousRef.current = { startIdx, endIdx, isUp };
-      out['--offset-distance'] = isUp
+      out["--offset-distance"] = isUp
         ? `${computed.itemLineLengths[startIdx][0]}px`
         : `${computed.itemLineLengths[endIdx][1]}px`;
-      out['--opacity'] = items[isUp ? startIdx : endIdx].original._step !== undefined ? '0' : '1';
+      out["--opacity"] = items[isUp ? startIdx : endIdx].original._step !== undefined ? "0" : "1";
     }
 
     return out;
@@ -249,10 +231,7 @@ function getLineOffset(depth: number): number {
   return 16 + BASE;
 }
 
-export function TOCItem({
-  item,
-  ...props
-}: Primitive.TOCItemProps & { item: Primitive.TOCItemType }) {
+export function TOCItem({ item, ...props }: Primitive.TOCItemProps & { item: Primitive.TOCItemType }) {
   const items = useTOCItems();
   const { isFirst, isLast, svg } = useMemo(() => {
     const index = items.indexOf(item);
@@ -270,8 +249,8 @@ export function TOCItem({
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className={cn(
-            'absolute -top-1.5 inset-s-0 bottom-0 h-[calc(100%+--spacing(1.5))] -z-1 rtl:-scale-x-100',
-            l1 !== l2 && 'h-full bottom-1.5',
+            "absolute -top-1.5 inset-s-0 bottom-0 h-[calc(100%+--spacing(1.5))] -z-1 rtl:-scale-x-100",
+            l1 !== l2 && "h-full bottom-1.5",
           )}
           style={{
             width: Math.max(l0, l1) + 9,
@@ -288,14 +267,14 @@ export function TOCItem({
           )}
           <line
             x1={l1 + 0.5}
-            y1={l0 === l1 ? '6' : '12'}
+            y1={l0 === l1 ? "6" : "12"}
             x2={l1 + 0.5}
             y2="100%"
             strokeWidth="1"
             className="stroke-fd-foreground/10"
           />
           {item._step !== undefined && (
-            <g transform={`translate(${l1 + 0.5}, ${l1 === l2 ? '3' : '6'})`}>
+            <g transform={`translate(${l1 + 0.5}, ${l1 === l2 ? "3" : "6"})`}>
               <circle cx="0" cy="50%" r="8" className="fill-fd-muted" />
               <text
                 x="0"
@@ -319,9 +298,9 @@ export function TOCItem({
       href={item.url}
       {...props}
       className={cn(
-        'prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere data-[active=true]:text-fd-primary',
-        isFirst && 'pt-0',
-        isLast && 'pb-0',
+        "prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere data-[active=true]:text-fd-primary",
+        isFirst && "pt-0",
+        isLast && "pb-0",
         props.className,
       )}
       style={{

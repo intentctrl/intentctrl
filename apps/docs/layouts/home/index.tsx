@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import type { BaseLayoutProps, NavOptions } from '../shared';
-import { type ComponentProps, createContext, type FC, use } from 'react';
-import { baseSlots, useLinkItems, type BaseSlots, type BaseSlotsProps } from '../shared';
-import type { LinkItemType } from '../shared';
-import { Container } from './slots/container';
-import { Header } from './slots/header';
+import type { BaseLayoutProps, NavOptions } from "../shared";
+import { type ComponentProps, createContext, type FC, use } from "react";
+import { baseSlots, useLinkItems, type BaseSlots, type BaseSlotsProps } from "../shared";
+import type { LinkItemType } from "../shared";
+import { Container } from "./slots/container";
+import { Header } from "./slots/header";
 
-export interface HomeLayoutProps extends BaseLayoutProps, ComponentProps<'main'> {
+export interface HomeLayoutProps extends BaseLayoutProps, ComponentProps<"main"> {
   nav?: Nav;
   slots?: Partial<HomeSlots>;
 }
@@ -20,8 +20,8 @@ interface Nav extends NavOptions {
 }
 
 export interface HomeSlots extends BaseSlots {
-  header: FC<ComponentProps<'header'>>;
-  container: FC<ComponentProps<'main'>>;
+  header: FC<ComponentProps<"header">>;
+  container: FC<ComponentProps<"main">>;
 }
 
 const LayoutContext = createContext<{
@@ -33,8 +33,7 @@ const LayoutContext = createContext<{
 
 export function useHomeLayout() {
   const context = use(LayoutContext);
-  if (!context)
-    throw new Error('Please use this component under <HomeLayout /> (`fumadocs-ui/layouts/home`).');
+  if (!context) throw new Error("Please use this component under <HomeLayout /> (`fumadocs-ui/layouts/home`).");
   return context;
 }
 
