@@ -1,0 +1,7 @@
+{
+  "title": "UI Components",
+  "description": "UI Components",
+  "icon": "PanelsTopLeft",
+  "root": true,
+  "pages": ["---Introduction---", "index", "..."]
+}

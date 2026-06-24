@@ -1,14 +1,14 @@
 import { source } from "@/lib/source";
-import { DocsLayout } from "@/layouts/docs";
+import { DocsLayout } from "@/layouts/notebook";
 import { baseOptions } from "@/lib/layout.shared";
 import { AISearch, AISearchPanel, AISearchTrigger } from "@/components/ai/search";
 import { MessageCircleIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 
-export default function Layout({ children }: LayoutProps<"/docs">) {
+export default function Layout({ children }: LayoutProps<"/">) {
   return (
-    <DocsLayout tree={source.getPageTree()} {...baseOptions()}>
+    <DocsLayout tree={source.getPageTree()} tabMode="navbar" {...baseOptions()}>
       <AISearch>
         <AISearchPanel />
         <AISearchTrigger
