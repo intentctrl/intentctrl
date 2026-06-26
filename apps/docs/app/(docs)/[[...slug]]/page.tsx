@@ -41,7 +41,7 @@ export default async function Page(props: PageProps<"/[[...slug]]">) {
           })}
         />
       </DocsBody>
-       {page.data.lastModified && <PageLastUpdate date={page.data.lastModified} />}
+      {page.data.lastModified && <PageLastUpdate date={page.data.lastModified} />}
     </DocsPage>
   );
 }

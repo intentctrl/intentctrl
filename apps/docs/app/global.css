@@ -1,17 +1,24 @@
 @import "tailwindcss";
-@import "fumadocs-ui/css/solar.css";
+@import "fumadocs-ui/css/black.css";
 @import "fumadocs-ui/css/preset.css";
 
 html {
-  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+  scroll-padding-top: 3rem;
 }
+
+/* debugger */
+/* * {
+  outline: 1px solid #f4488888;
+  outline-offset: -1px;
+} */
 
 @theme inline {
   --color-fd-primary: var(--fd-primary);
 }
 
 :root {
-  --fd-primary: oklch(72% 0.12655 184);
+  --fd-primary: oklch(72% 0.127 182);
 }
 
 .dark {
@@ -21,4 +28,37 @@ html {
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* TODO: pass size by var */
+.bg-grid-lines {
+  background-position: -10px -10px;
+  background-size: 20px 20px;
+  background-image:
+    linear-gradient(to right, #8884 1px, transparent 1px), linear-gradient(to bottom, #8884 1px, transparent 1px);
+}
+.bg-grid-lines-lg {
+  background-position: -20px -20px;
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, #8884 1px, transparent 1px), linear-gradient(to bottom, #8884 1px, transparent 1px);
+}
+
+.bg-grid-lines-xl {
+  background-position: -30px -30px;
+  background-size: 60px 60px;
+  background-image:
+    linear-gradient(to right, #8884 1px, transparent 1px), linear-gradient(to bottom, #8884 1px, transparent 1px);
+}
+
+.bg-grid-lines-y-lg {
+  background-position: -20px -20px;
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, #8884 1px, transparent 1px);
+}
+
+.bg-grid-lines-y-xl {
+  background-position: -30px -30px;
+  background-size: 60px 60px;
+  background-image: linear-gradient(to right, #8884 1px, transparent 1px);
 }

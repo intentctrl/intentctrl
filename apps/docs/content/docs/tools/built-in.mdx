@@ -1,0 +1,100 @@
+---
+title: Built-in Tools
+description: DOM interaction tools available to the AI
+---
+
+Built-in tools give the AI the ability to interact with the page the same way a user would — clicking buttons, filling forms, navigating routes, and reading content.
+
+## How the AI targets elements
+
+When the AI receives the page content, every interactive element is annotated with selector information. The annotations let the AI reference specific elements by their location on the page.
+
+You can help the AI identify important elements by adding data attributes:
+
+| Attribute          | Used by           | Purpose                                    |
+| ------------------ | ----------------- | ------------------------------------------ |
+| `data-ai-field`    | type, extract     | Marks input fields, textareas, and selects |
+| `data-ai-action`   | click             | Marks clickable elements                   |
+| `data-ai-region`   | highlight, scroll | Marks areas or containers                  |
+| `data-ai-highlight`| —                 | Set automatically by the highlight tool on the targeted element |
+
+Adding these attributes is optional but makes targeting more reliable.
+
+You can style highlighted elements with CSS:
+
+```css title="app/globals.css"
+[data-ai-highlight] {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+  transition: outline-color 0.2s;
+}
+```
+
+The attribute is present for three seconds while the flash animation plays, then removed automatically.
+
+## Tool reference
+
+### navigate
+
+Navigates the user to a different route.
+
+```json
+{ "target": "/dashboard/reports" }
+```
+
+Works with client-side routers (Next.js, React Router) and falls back to standard browser navigation. External URLs, `javascript:` links, and `data:` URIs are rejected for security.
+
+### click
+
+Clicks an interactive element.
+
+```json
+{ "label": "Submit" }
+```
+
+Matches by `data-ai-action`, `aria-label`, placeholder, or visible text. Triggers the element's native click handler.
+
+### type
+
+Types a value into a text field.
+
+```json
+{ "field": "Email", "value": "user@example.com" }
+```
+
+Supports all input types, textareas, and contenteditable elements. Works with framework-controlled inputs by triggering the appropriate change events.
+
+### highlight
+
+Briefly flashes an element to draw the user's attention.
+
+```json
+{ "region": "Error summary" }
+```
+
+The element is highlighted for three seconds. No approval needed — purely visual feedback.
+
+### scroll
+
+Scrolls an element into the viewport.
+
+```json
+{ "target": "Pricing section" }
+```
+
+Smooth scrolls to the element and centers it on screen.
+
+### extract
+
+Reads the current value or text content of an element.
+
+```json
+{ "field": "Search input" }
+```
+
+Returns the element's value (for inputs), text content (for general elements), or inner text (for contenteditable regions).
+
+## Controlling availability
+
+See [Permissions](/docs/permissions) to learn how to restrict which built-in tools the AI can use.

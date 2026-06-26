@@ -1,0 +1,76 @@
+---
+title: Permissions
+description: Control which tools the AI can use
+---
+
+Permissions let you restrict the AI's ability to use tools on a per-user or per-session basis. This is useful when different users have different levels of access, or when you want to prevent the AI from taking certain actions entirely.
+
+## Setting permissions
+
+Pass permissions to the provider:
+
+```tsx
+<IntentCtrlProvider
+  apiKey="..."
+  permissions={{
+    navigate: false,   // AI cannot navigate
+    click: true,       // AI can click without approval
+    // type: undefined  — allowed, but requires approval (default)
+  }}
+>
+```
+
+## How it works
+
+Each built-in tool has three possible permission states:
+
+| Value       | Behavior                                                                       |
+| ----------- | ------------------------------------------------------------------------------ |
+| `undefined` | Tool is allowed but requires user approval if it has the approval flag enabled |
+| `true`      | Tool is allowed and skips the approval prompt entirely                         |
+| `false`     | Tool is denied — the AI cannot call it                                         |
+
+Custom tools are always permitted. Their approval behavior is controlled by the `needsApproval` flag on the tool definition.
+
+## Reactive permissions
+
+You can update permissions dynamically using `usePermissions()`:
+
+```tsx title="components/permission-panel.tsx"
+import { usePermissions } from "@intentctrl/react";
+
+export function PermissionPanel() {
+  const { permissions, setPermissions } = usePermissions();
+
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={permissions.navigate !== false}
+          onChange={(e) => setPermissions({ navigate: !e.target.checked ? false : undefined })}
+        />
+        Allow AI to navigate
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          checked={permissions.click !== false}
+          onChange={(e) => setPermissions({ click: !e.target.checked ? false : undefined })}
+        />
+        Allow AI to click
+      </label>
+    </div>
+  );
+}
+```
+
+Changes take effect on the next message sent to the AI.
+
+## Use cases
+
+- **Read-only mode** — deny `navigate`, `click`, and `type` so the AI can only read and highlight
+- **Guest users** — deny all built-in tools, allow only custom tools
+- **Admin mode** — set everything to `true` to bypass approval prompts
+- **Feature gates** — tie permissions to user roles or subscription tiers

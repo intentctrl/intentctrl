@@ -1,0 +1,37 @@
+---
+title: Tools Overview
+description: How the AI interacts with your application
+---
+
+Tools are the mechanism through which the AI takes action. When the AI decides it needs to do something — navigate to a page, fill in a form, call an API — it invokes a tool.
+
+IntentCtrl comes with two categories of tools:
+
+## Built-in tools
+
+Six tools that let the AI interact with the DOM directly:
+
+- **navigate** — change the current route
+- **click** — click an interactive element
+- **type** — enter text into a field
+- **highlight** — flash a region to draw attention
+- **scroll** — scroll an element into view
+- **extract** — read a field's value or text
+
+These tools are always available unless explicitly restricted. They work by using CSS and XPath selectors derived from the page's annotated content.
+
+## Custom tools
+
+Tools you define yourself. Any function your app can perform can be exposed as a tool — searching a database, fetching data from an API, submitting a form, or triggering a workflow.
+
+Custom tools are registered using `useTool()` and are scoped to the component's lifecycle: they exist while the component is mounted and are cleaned up automatically.
+
+## Tool execution flow
+
+1. The user sends a message
+2. The AI receives the message along with the page content and tool definitions
+3. The AI may request to call one or more tools
+4. Each tool call is validated — input is checked against its schema
+5. If the tool requires approval, execution pauses for user confirmation
+6. The tool runs and its result is sent back to the AI
+7. The AI continues its response with the tool result in context

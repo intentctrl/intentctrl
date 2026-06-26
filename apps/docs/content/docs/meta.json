@@ -1,7 +1,14 @@
 {
   "title": "Documentation",
-  "description": "Documentation",
-  "icon": "Dock",
+  "description": "Documentation for the IntentCtrl SDK",
+  "icon": "FileText",
   "root": true,
-  "pages": ["---Getting Started---", "index", "..."]
+  "pages": [
+    "index",
+    "getting-started",
+    "chat",
+    "tools",
+    "configuration",
+    "reference"
+  ]
 }

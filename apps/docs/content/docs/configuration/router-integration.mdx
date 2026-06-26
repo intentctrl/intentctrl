@@ -1,0 +1,64 @@
+---
+title: Router Integration
+description: Set up client-side navigation so the AI can move between pages
+---
+
+For the `navigate` tool to work with client-side routing (rather than full page reloads), IntentCtrl needs to know about your router.
+
+## Next.js App Router
+
+```tsx title="components/router-bridge.tsx"
+"use client";
+
+import { setRouter } from "@intentctrl/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export function RouterBridge() {
+  const router = useRouter();
+
+  useEffect(() => {
+    setRouter({ push: (path) => router.push(path) });
+  }, [router]);
+
+  return null;
+}
+```
+
+Place this component somewhere inside your `IntentCtrlProvider`.
+
+## React Router
+
+```tsx title="components/router-bridge.tsx"
+import { setRouter } from "@intentctrl/react";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+
+export function RouterBridge() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setRouter({ push: (path) => navigate(path) });
+  }, [navigate]);
+
+  return null;
+}
+```
+
+React Router DOM v6+ is also auto-detected via a global variable, but explicit setup is more reliable.
+
+## Other frameworks
+
+Any router with a `push` method works:
+
+```ts
+setRouter({
+  push: (path: string) => {
+    // Your custom navigation logic
+  },
+});
+```
+
+## What happens without a router
+
+If no router is configured, the `navigate` tool falls back to `window.location.href`, which causes a full page reload. This works but loses client-side state.

@@ -1,0 +1,6 @@
+{
+  "title": "Tools",
+  "icon": "Wrench",
+  "pages": ["index", "built-in", "custom"],
+  "defaultOpen": true
+}

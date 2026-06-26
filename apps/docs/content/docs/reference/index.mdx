@@ -1,0 +1,437 @@
+---
+title: API Reference
+description: Complete reference for all exported APIs
+---
+
+## Components
+
+### IntentCtrlProvider
+
+The root provider component. Must wrap any component that uses IntentCtrl hooks.
+
+<TypeTable
+  type={{
+    apiUrl: {
+      description: "Your AI backend chat endpoint URL",
+      type: "string",
+      default: '"http://localhost:4000/api/chat"',
+    },
+    apiKey: {
+      description: "API key sent as the `x-api-key` header to your backend",
+      type: "string",
+      required: true,
+    },
+    permissions: {
+      description: "Initial permission overrides per tool",
+      type: "RuntimePermissions",
+    },
+    dataContext: {
+      description: "Initial key-value context sent with every message",
+      type: "Record<string, unknown>",
+    },
+    children: {
+      description: "React children",
+      type: "ReactNode",
+      required: true,
+    },
+  }}
+/>
+
+---
+
+## Hooks
+
+### useIntentCtrl
+
+Returns the full chat interface. Throws if used outside `IntentCtrlProvider`.
+
+<TypeTable
+  type={{
+    messages: {
+      description: "Array of messages in the current conversation",
+      type: "UIMessage[]",
+    },
+    sendMessage: {
+      description: "Send a new user message. Bundles page content, tools, permissions, and data context automatically.",
+      type: "(text: string) => Promise<void>",
+    },
+    status: {
+      description: "Current state of the chat lifecycle",
+      type: '"submitted" | "streaming" | "ready" | "error"',
+    },
+    stop: {
+      description: "Abort an in-progress streaming response",
+      type: "() => void",
+    },
+    error: {
+      description: "Latest error message, if any",
+      type: "string | undefined",
+    },
+    approveToolCall: {
+      description: "Approve a pending tool call",
+      type: "(toolCallId: string) => Promise<void>",
+    },
+    denyToolCall: {
+      description: "Deny a pending tool call",
+      type: "(toolCallId: string) => void",
+    },
+    switchSession: {
+      description: "Switch to a different conversation session",
+      type: "(sessionId: string) => Promise<void>",
+    },
+    newSession: {
+      description: "Create a new conversation session",
+      type: "() => Promise<void>",
+    },
+    refreshSessions: {
+      description: "Refresh the session list from the backend",
+      type: "() => Promise<void>",
+    },
+    session: {
+      description: "Current session state — active session ID, session list, and initialisation status",
+      type: "SessionState",
+    },
+  }}
+/>
+
+### useTool
+
+Registers a custom tool for the AI to call. The tool is available while the component is mounted.
+
+<TypeTable
+  type={{
+    id: {
+      description: "Unique tool identifier sent to the AI",
+      type: "string",
+      required: true,
+    },
+    description: {
+      description: "Tells the AI what the tool does and when to call it. Write this for the AI.",
+      type: "string",
+      required: true,
+    },
+    inputSchema: {
+      description: "Zod schema defining the tool's expected input. Validated before execution.",
+      type: "ZodType",
+      required: true,
+    },
+    needsApproval: {
+      description: "If `true`, execution pauses for user confirmation via `approveToolCall` / `denyToolCall`",
+      type: "boolean",
+      default: "false",
+    },
+    handler: {
+      description: "The function that runs when the AI calls the tool. Receives validated input, returns a value sent back to the AI.",
+      type: "(input) => Promise<unknown>",
+      required: true,
+    },
+  }}
+/>
+
+### usePermissions
+
+Reads and updates the current permission state reactively.
+
+<TypeTable
+  type={{
+    permissions: {
+      description: "Current permission state — controls which built-in tools are available",
+      type: "RuntimePermissions",
+    },
+    setPermissions: {
+      description: "Update permissions. Changes take effect on the next message.",
+      type: "(p: RuntimePermissions) => void",
+    },
+  }}
+/>
+
+### useDataContext
+
+Injects contextual data that is sent with every chat request. Data is cleaned up when the component unmounts.
+
+<TypeTable
+  type={{
+    data: {
+      description: "Key-value pairs injected into the runtime context. Keys are cleaned up on unmount.",
+      type: "Record<string, unknown>",
+      required: true,
+    },
+  }}
+/>
+
+---
+
+## Functions
+
+### setRouter
+
+Registers a client-side router for the `navigate` tool.
+
+<TypeTable
+  type={{
+    router: {
+      description: "An object with a `push` method for client-side navigation",
+      type: "{ push: (path: string) => void }",
+      required: true,
+    },
+  }}
+/>
+
+---
+
+## Types
+
+### RuntimePermissions
+
+Controls which built-in tools are available to the AI.
+
+<TypeTable
+  type={{
+    navigate: {
+      description: "Route navigation",
+      type: "boolean",
+    },
+    click: {
+      description: "Click interactive elements",
+      type: "boolean",
+    },
+    type: {
+      description: "Type into text fields",
+      type: "boolean",
+    },
+    highlight: {
+      description: "Flash a region to draw attention",
+      type: "boolean",
+    },
+    scroll: {
+      description: "Scroll an element into view",
+      type: "boolean",
+    },
+    extract: {
+      description: "Read a field's value or text",
+      type: "boolean",
+    },
+  }}
+/>
+
+- `undefined` — allowed, approval may be required
+- `true` — allowed, bypasses approval
+- `false` — denied
+
+### SerializedTool
+
+A tool definition serialized for transport.
+
+<TypeTable
+  type={{
+    id: {
+      description: "Unique tool identifier",
+      type: "string",
+      required: true,
+    },
+    description: {
+      description: "Tool description sent to the AI",
+      type: "string",
+      required: true,
+    },
+    inputSchema: {
+      description: "JSON Schema representation of the tool's input",
+      type: "JsonSchema",
+      required: true,
+    },
+    needsApproval: {
+      description: "Whether the tool requires user confirmation",
+      type: "boolean",
+      required: true,
+    },
+  }}
+/>
+
+### ChatRequest
+
+The payload sent to your backend with every user message.
+
+<TypeTable
+  type={{
+    message: {
+      description: "The latest user message",
+      type: "UIMessage",
+      required: true,
+    },
+    pageContent: {
+      description: "Current page rendered as annotated Markdown with CSS/XPath selectors",
+      type: "string",
+      required: true,
+    },
+    tools: {
+      description: "All registered tools serialized for transport",
+      type: "SerializedTool[]",
+      required: true,
+    },
+    dataContext: {
+      description: "Runtime context data (page info, user info, feature flags, etc.)",
+      type: "Record<string, unknown>",
+    },
+    permissions: {
+      description: "Permission overrides per tool",
+      type: "Record<string, boolean | undefined>",
+    },
+  }}
+/>
+
+### SessionState
+
+<TypeTable
+  type={{
+    activeSessionId: {
+      description: "The currently active session ID, or `null` if none",
+      type: "string | null",
+      required: true,
+    },
+    sessions: {
+      description: "Paginated list of all sessions for the current visitor",
+      type: "PaginatedChatSessionsResponse",
+      required: true,
+    },
+    initState: {
+      description: "Initialization state of the session manager",
+      type: '"idle" | "loading" | "ready" | "error"',
+      required: true,
+    },
+  }}
+/>
+
+### PaginatedChatSessionsResponse
+
+<TypeTable
+  type={{
+    items: {
+      description: "Array of session records",
+      type: "ChatSessionResponse[]",
+      required: true,
+    },
+    rowCount: {
+      description: "Total number of matching records",
+      type: "number",
+      required: true,
+    },
+    pageCount: {
+      description: "Total number of pages",
+      type: "number",
+      required: true,
+    },
+    pageIndex: {
+      description: "Current page index (zero-based)",
+      type: "number",
+      required: true,
+    },
+    pageSize: {
+      description: "Number of items per page",
+      type: "number",
+      required: true,
+    },
+  }}
+/>
+
+### ChatSessionResponse
+
+<TypeTable
+  type={{
+    id: {
+      description: "Unique session identifier",
+      type: "string",
+      required: true,
+    },
+    projectId: {
+      description: "Project this session belongs to",
+      type: "string",
+      required: true,
+    },
+    projectSlug: {
+      description: "Project slug",
+      type: "string",
+      required: true,
+    },
+    externalUserId: {
+      description: "Optional external user ID linked to this session",
+      type: "string | null",
+      required: true,
+    },
+    visitorId: {
+      description: "Visitor identifier",
+      type: "string",
+      required: true,
+    },
+    active: {
+      description: "Whether the session is currently active",
+      type: "boolean",
+      required: true,
+    },
+    createdAt: {
+      description: "ISO timestamp of session creation",
+      type: "string",
+      required: true,
+    },
+    updatedAt: {
+      description: "ISO timestamp of last session update",
+      type: "string",
+      required: true,
+    },
+  }}
+/>
+
+### ApiResponse
+
+<TypeTable
+  type={{
+    status: {
+      description: "HTTP status code",
+      type: "number",
+      required: true,
+    },
+    success: {
+      description: "Whether the request succeeded",
+      type: "boolean",
+      required: true,
+    },
+    data: {
+      description: "The response payload",
+      type: "T",
+      required: true,
+    },
+    message: {
+      description: "Human-readable status or error message",
+      type: "string",
+      required: true,
+    },
+  }}
+/>
+
+### UIMessage
+
+Re-exported from the Vercel AI SDK. Represents a chat message with structured parts.
+
+<TypeTable
+  type={{
+    id: {
+      description: "Unique message identifier",
+      type: "string",
+      required: true,
+    },
+    role: {
+      description: "Message sender role",
+      type: '"user" | "assistant"',
+      required: true,
+    },
+    content: {
+      description: "Text content of the message",
+      type: "string",
+      required: true,
+    },
+    parts: {
+      description: "Structured parts — text, reasoning, tool calls, files, sources",
+      type: "MessagePart[]",
+      required: true,
+    },
+  }}
+/>

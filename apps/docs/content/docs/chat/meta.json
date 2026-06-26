@@ -1,0 +1,6 @@
+{
+  "title": "Chat",
+  "icon": "MessageCircle",
+  "pages": ["index", "sessions", "approvals"],
+  "defaultOpen": true
+}

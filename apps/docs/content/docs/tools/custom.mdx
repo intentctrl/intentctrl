@@ -1,0 +1,108 @@
+---
+title: Custom Tools
+description: Register your own tools so the AI can call them
+---
+
+Custom tools let you expose any function in your application to the AI. If your app can do it — search a database, fetch from an API, trigger a workflow — you can make it a tool.
+
+## The useTool hook
+
+```tsx title="components/search-widget.tsx"
+import { useTool } from "@intentctrl/react";
+import { z } from "zod";
+
+export function SearchWidget() {
+  useTool({
+    id: "search_knowledge_base",
+    description: "Search the knowledge base for relevant articles",
+    inputSchema: z.object({
+      query: z.string(),
+      maxResults: z.number().min(1).max(20).optional(),
+    }),
+    handler: async ({ query, maxResults }) => {
+      const results = await searchApi(query, maxResults ?? 5);
+      return results;
+    },
+  });
+
+  return <div>Search widget</div>;
+}
+```
+
+Every time the user sends a message, all registered tools are sent to the AI as available functions.
+
+## Tool contract
+
+<TypeTable
+  type={{
+    id: {
+      description: "Unique name for the tool. The AI uses this to call it.",
+      type: "string",
+      required: true,
+    },
+    description: {
+      description: "Explains to the AI what the tool does and when to use it. Write this for the AI, not for humans.",
+      type: "string",
+      required: true,
+    },
+    inputSchema: {
+      description: "A Zod schema defining the tool's expected input. The AI only sees the JSON Schema representation, but inputs are validated with the full Zod schema before execution.",
+      type: "ZodType",
+      required: true,
+    },
+    handler: {
+      description: "The function that runs when the AI calls the tool. Receives validated input, returns a value that's sent back to the AI.",
+      type: "(input) => Promise<unknown>",
+      required: true,
+    },
+    needsApproval: {
+      description: "If `true`, the tool requires user confirmation before executing.",
+      type: "boolean",
+      default: "false",
+    },
+  }}
+/>
+
+## Writing good descriptions
+
+The description is the most important part of a custom tool. It's how the AI decides whether to use it and how to fill in the parameters.
+
+Bad: `"Search function"`  
+Good: `"Search the product catalog by name or SKU. Returns matching products with their price, stock level, and category."`
+
+Bad: `"Get user data"`  
+Good: `"Retrieve user profile information by user ID. Use this when the user asks about their account details, settings, or personal information."`
+
+## Lifecycle
+
+Tools registered with `useTool()` are scoped to the component that registers them:
+
+- **Mounted** — tool is available to the AI
+- **Unmounted** — tool is removed automatically
+- **Multiple instances** — if two components register the same tool ID, it stays active until both are unmounted
+
+This means a tool for a settings panel only exists while the settings panel is open. A tool for a dashboard widget only exists while that widget is visible.
+
+## Example: Fetching data
+
+```tsx title="components/order-lookup.tsx"
+import { useTool } from "@intentctrl/react";
+import { z } from "zod";
+
+export function OrderLookup() {
+  useTool({
+    id: "get_order_status",
+    description:
+      "Get the current status of an order by order ID. Returns delivery date, tracking number, and current status.",
+    inputSchema: z.object({
+      orderId: z.string(),
+    }),
+    handler: async ({ orderId }) => {
+      const response = await fetch(`/api/orders/${orderId}`);
+      return response.json();
+    },
+  });
+
+  return null;
+}
+```

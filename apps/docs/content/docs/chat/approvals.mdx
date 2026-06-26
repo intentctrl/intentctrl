@@ -1,0 +1,54 @@
+---
+title: Approvals
+description: Let users confirm sensitive actions before the AI executes them
+---
+
+Some tools should not run without the user's explicit consent. IntentCtrl provides an approval workflow for these cases.
+
+## How it works
+
+When the AI calls a tool that has `needsApproval: true`, the execution pauses. The tool call appears in the message parts with state `"approval-requested"`. Your UI can detect this state and prompt the user.
+
+The user either approves or denies the call:
+
+```tsx
+const { approveToolCall, denyToolCall } = useIntentCtrl();
+
+await approveToolCall(toolCallId); // tool executes
+denyToolCall(toolCallId); // tool is cancelled
+```
+
+## Tool state lifecycle
+
+Each tool invocation goes through a series of states as it progresses:
+
+| state                | Meaning                           |
+| -------------------- | --------------------------------- |
+| `input-streaming`    | Tool arguments are being streamed |
+| `input-available`    | Arguments are fully received      |
+| `approval-requested` | Waiting for user approval         |
+| `approval-responded` | User has approved or denied       |
+| `output-available`   | Tool executed successfully        |
+| `output-error`       | Tool execution failed             |
+| `output-denied`      | User denied the call              |
+
+## Detecting tool calls
+
+Messages contain a `parts` array. Each part has a `type` field:
+
+| type             | Represents                      |
+| ---------------- | ------------------------------- |
+| `"text"`         | Text content                    |
+| `"reasoning"`    | AI reasoning (chain of thought) |
+| `"dynamic-tool"` | A tool call (dynamic name)      |
+| `"tool-<name>"`  | A tool call for a specific tool |
+
+Tool parts include `toolCallId`, `toolName`, `state`, `input`, `output`, and `errorText`.
+
+## Usage
+
+Call `approveToolCall(toolCallId)` to allow the tool to execute, or `denyToolCall(toolCallId)` to cancel it.
+
+## When to use approvals
+
+Enable approvals for actions that modify data, navigate the user, or perform irreversible operations. Tools that only read or highlight content typically don't need approval.

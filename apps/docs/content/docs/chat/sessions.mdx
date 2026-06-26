@@ -1,0 +1,65 @@
+---
+title: Sessions
+description: Managing conversations across page visits
+---
+
+IntentCtrl organizes conversations into sessions. A session persists the chat history so users can pick up where they left off, even after closing the page.
+
+## Session lifecycle
+
+Sessions are created lazily. The first time a user sends a message, a new session is created automatically. Subsequent visits restore the most recent active session.
+
+All session data is persisted locally via IndexedDB and synced to your backend through REST API calls.
+
+## Switching sessions
+
+Users can switch between conversations:
+
+```tsx
+const { session, switchSession, newSession, refreshSessions } = useIntentCtrl();
+
+// Switch to a past conversation
+await switchSession("session-id-123");
+
+// Start a fresh conversation
+await newSession();
+
+// Refresh the session list (e.g., after opening a sidebar)
+await refreshSessions();
+```
+
+## Session state
+
+```tsx
+session.activeSessionId; // string | null — the currently active session
+session.sessions; // { items, rowCount, pageCount, pageIndex, pageSize }
+session.initState; // "idle" | "loading" | "ready" | "error"
+```
+
+The session list is paginated. Each item in `items` represents a conversation with its id, timestamps, and associated user information.
+
+## Example: Session sidebar
+
+```tsx title="components/session-sidebar.tsx"
+export function SessionSidebar() {
+  const { session, switchSession, newSession } = useIntentCtrl();
+
+  return (
+    <div>
+      <button onClick={newSession}>New conversation</button>
+
+      <ul>
+        {session.sessions.items.map((s) => (
+          <li
+            key={s.id}
+            onClick={() => switchSession(s.id)}
+            className={s.id === session.activeSessionId ? "active" : ""}
+          >
+            {s.id.slice(0, 8)}...
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```

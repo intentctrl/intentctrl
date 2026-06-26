@@ -1,14 +1,63 @@
 ---
 title: Overview
-description: Your first document
-icon: Album
+description: What IntentCtrl is and why you'd use it
+icon: BookOpen
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+IntentCtrl is an embedded AI runtime for React applications. It connects your app to an AI assistant that can understand what's on screen and take action through tools.
 
-## What is Next?
+## How it works
 
-<Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
-</Cards>
+You wrap your application in `<IntentCtrlProvider>`, and every component beneath it gets access to the AI chat via `useIntentCtrl()`. When the user sends a message, IntentCtrl captures the current page as structured content, bundles your registered tools, and sends everything to your AI backend. The AI can respond naturally and call tools — both built-in DOM actions and your own custom functions.
+
+## What you get
+
+- **Streaming chat** — real-time AI responses with a single hook
+- **Page-aware AI** — the assistant sees the page the user is looking at
+- **Built-in tools** — navigate, click, type, scroll, highlight, and extract page content
+- **Custom tools** — register your own functions with typed inputs
+- **Permissions** — control which tools the AI may use, per user
+- **Approval workflows** — require user confirmation before sensitive actions
+- **Session management** — persistent conversations across page visits
+
+## Requirements
+
+IntentCtrl runs in the browser and requires:
+
+- **React 19** and **React DOM 19**
+- **Zod 4** — used to define tool input schemas
+- **An AI backend** — a server that accepts chat requests and returns streaming responses
+
+## One package
+
+{/* prettier-ignore */}
+<CodeBlockTabs defaultValue="npm" groupId="package-manager">
+  <CodeBlockTabsList>
+    <CodeBlockTabsTrigger value="npm">npm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="yarn">yarn</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="bun">bun</CodeBlockTabsTrigger>
+  </CodeBlockTabsList>
+  <CodeBlockTab value="npm">
+    ```bash
+    npm install @intentctrl/react
+    ```
+  </CodeBlockTab>
+  <CodeBlockTab value="pnpm">
+    ```bash
+    pnpm add @intentctrl/react
+    ```
+  </CodeBlockTab>
+  <CodeBlockTab value="yarn">
+    ```bash
+    yarn add @intentctrl/react
+    ```
+  </CodeBlockTab>
+  <CodeBlockTab value="bun">
+    ```bash
+    bun add @intentctrl/react
+    ```
+  </CodeBlockTab>
+</CodeBlockTabs>
+
+That's all you install. Everything — the engine, the React bindings, the types — comes from `@intentctrl/react`.

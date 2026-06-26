@@ -1,0 +1,6 @@
+{
+  "title": "Configuration",
+  "icon": "Cog",
+  "pages": ["index", "permissions", "router-integration"],
+  "defaultOpen": true
+}

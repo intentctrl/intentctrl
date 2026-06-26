@@ -1,0 +1,97 @@
+---
+title: Chat Interface
+description: Sending messages and handling responses
+---
+
+The chat interface is the primary way users interact with the AI. All functionality is available through the `useIntentCtrl()` hook.
+
+## Hook reference
+
+```tsx
+const {
+  messages, // Array of messages in the current conversation
+  sendMessage, // Send a new user message
+  status, // Current state of the chat
+  stop, // Abort an in-progress response
+  error, // Latest error message, if any
+} = useIntentCtrl();
+```
+
+### messages
+
+An array of `UIMessage` objects. Each message has:
+
+- **id** — unique identifier
+- **role** — `"user"` or `"assistant"`
+- **content** — text content of the message
+- **parts** — structured parts — text, reasoning, tool calls, files, sources
+
+Each part has a `type` field. The types you will encounter:
+
+| type             | Represents                            |
+| ---------------- | ------------------------------------- |
+| `"text"`         | Text content                          |
+| `"reasoning"`    | AI chain-of-thought reasoning         |
+| `"dynamic-tool"` | A tool call (dynamic name)            |
+| `"tool-<name>"`  | A tool call for a specific known tool |
+
+Tool parts also carry `state` (e.g. `"approval-requested"`, `"output-available"`), `toolCallId`, `input`, `output`, and `errorText`.
+
+Messages update in real-time as the AI streams its response.
+
+### status
+
+The chat lifecycle has four states:
+
+| Status      | Meaning                                                 |
+| ----------- | ------------------------------------------------------- |
+| `submitted` | Message sent, waiting for the AI to begin responding    |
+| `streaming` | AI is responding — content appears in real-time         |
+| `ready`     | Response is complete, waiting for the next user message |
+| `error`     | Something went wrong — check the `error` field          |
+
+### sendMessage
+
+```ts
+sendMessage("Show me the sales report");
+```
+
+Sends the user's message along with the current page content, registered tools, permissions, and data context. Everything the AI needs is bundled automatically.
+
+### stop
+
+Interrupts a response that's currently streaming. The response will be cut off at whatever point it's reached.
+
+## Example
+
+```tsx title="components/chat-window.tsx"
+export function ChatWindow() {
+  const { messages, sendMessage, status, stop, error } = useIntentCtrl();
+
+  return (
+    <div>
+      {messages.map((message) => (
+        <div key={message.id} className={`message message-${message.role}`}>
+          {message.content}
+        </div>
+      ))}
+
+      {status === "streaming" && <button onClick={stop}>Stop</button>}
+
+      {error && <div className="error">{error}</div>}
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          const text = data.get("input") as string;
+          if (text.trim()) sendMessage(text);
+        }}
+      >
+        <input name="input" placeholder="Ask something..." />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  );
+}
+```

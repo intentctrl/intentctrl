@@ -1,0 +1,105 @@
+---
+title: Getting Started
+description: Set up IntentCtrl in your app in a few minutes
+icon: Rocket
+---
+
+## Quick Start
+
+<Steps>
+<Step>
+### Install
+
+{/* prettier-ignore */}
+<CodeBlockTabs defaultValue="npm" groupId="package-manager">
+  <CodeBlockTabsList>
+    <CodeBlockTabsTrigger value="npm">npm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="yarn">yarn</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="bun">bun</CodeBlockTabsTrigger>
+  </CodeBlockTabsList>
+  <CodeBlockTab value="npm">
+    ```bash
+    npm install @intentctrl/react
+    ```
+  </CodeBlockTab>
+  <CodeBlockTab value="pnpm">
+    ```bash
+    pnpm add @intentctrl/react
+    ```
+  </CodeBlockTab>
+  <CodeBlockTab value="yarn">
+    ```bash
+    yarn add @intentctrl/react
+    ```
+  </CodeBlockTab>
+  <CodeBlockTab value="bun">
+    ```bash
+    bun add @intentctrl/react
+    ```
+  </CodeBlockTab>
+</CodeBlockTabs>
+
+Make sure `react`, `react-dom`, and `zod` are already in your project.
+</Step>
+
+<Step>
+### Add the provider
+
+Wrap your application (or the part that needs AI) in `IntentCtrlProvider`. You need the URL of your AI backend and an API key.
+
+```tsx title="app/layout.tsx"
+import { IntentCtrlProvider } from "@intentctrl/react";
+
+export default function RootLayout({ children }) {
+  return (
+    <IntentCtrlProvider apiUrl="https://api.example.com/chat" apiKey={process.env.NEXT_PUBLIC_API_KEY!}>
+      {children}
+    </IntentCtrlProvider>
+  );
+}
+```
+</Step>
+
+<Step>
+### Start a chat
+
+Inside any child component, use `useIntentCtrl()` to send messages and display responses.
+
+```tsx title="components/chat-panel.tsx"
+import { useIntentCtrl } from "@intentctrl/react";
+
+export function ChatPanel() {
+  const { messages, sendMessage, status } = useIntentCtrl();
+
+  return (
+    <div>
+      {messages.map((msg) => (
+        <div key={msg.id}>
+          <strong>{msg.role}:</strong> {msg.content}
+        </div>
+      ))}
+      <input
+        placeholder="Ask something..."
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && e.currentTarget.value) {
+            sendMessage(e.currentTarget.value);
+            e.currentTarget.value = "";
+          }
+        }}
+      />
+      {status === "streaming" && <span>Thinking...</span>}
+    </div>
+  );
+}
+```
+
+That's it. The AI sees the current page, knows about any tools you've registered, and can respond with text or take actions.
+</Step>
+</Steps>
+
+## What's next
+
+- [Register custom tools](/docs/tools/custom) so the AI can interact with your app
+- [Control permissions](/docs/permissions) to restrict which actions the AI can take
+- [Learn about built-in tools](/docs/tools/built-in) the AI already has

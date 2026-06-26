@@ -1,0 +1,10 @@
+{
+  "pages": [
+    "index",
+    "---Browse---",
+    "...",
+    "---Agent---",
+    "[Bot][llms.txt](/llms.txt)",
+    "[Bot][llms-full.txt](/llms-full.txt)"
+  ]
+}
