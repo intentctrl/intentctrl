@@ -11,7 +11,7 @@ export { useIntentCtrlContext } from "./provider/context";
 export type { IntentCtrlContextValue } from "./provider/context";
 
 // Hooks
-export { useAiTool } from "./hooks/useAiTool";
+export { useTool } from "./hooks/useTool";
 export { useDataContext } from "./hooks/useDataContext";
 export { useIntentCtrl } from "./hooks/useIntentCtrl";
 export { usePermissions } from "./hooks/usePermissions";

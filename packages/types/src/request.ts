@@ -1,12 +1,11 @@
 import type { UIMessage } from "ai";
-import type { SemanticGraph } from "./semantic";
 import type { SerializedTool } from "./tools";
 
 export type { UIMessage } from "ai";
 
 export interface IntentCtrlRequest {
   message: UIMessage;
-  semanticContext: SemanticGraph;
+  pageContent: string;
   tools: SerializedTool[];
   dataContext?: Record<string, unknown>;
   permissions?: Record<string, boolean | undefined>;

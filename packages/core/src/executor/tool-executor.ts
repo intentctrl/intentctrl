@@ -10,7 +10,9 @@ export interface ExecuteToolParams {
   permissions: RuntimePermissions;
 }
 
-export type ExecuteToolResult = { ok: true; output: unknown } | { ok: false; error: string; retryable?: boolean };
+export type ExecuteToolResult =
+  | { status: true; output: unknown }
+  | { status: false; error: string };
 
 const TOOL_TIMEOUT_MS = 15_000;
 
@@ -26,7 +28,7 @@ export async function executeTool(params: ExecuteToolParams): Promise<ExecuteToo
   const { toolId, input, permissions } = params;
 
   if (!isPermitted(toolId, permissions)) {
-    return { ok: false, error: `Permission denied for tool: ${toolId}` };
+    return { status: false, error: `Permission denied for tool: ${toolId}` };
   }
 
   const registryTool = toolRegistry.getState().getById(toolId);
@@ -36,24 +38,24 @@ export async function executeTool(params: ExecuteToolParams): Promise<ExecuteToo
     if (isBuiltIn) {
       try {
         const output = await executeBuiltIn(toolId, input);
-        return { ok: true, output };
+        return { status: true, output };
       } catch (err) {
-        return { ok: false, error: err instanceof Error ? err.message : "Tool execution failed" };
+        return { status: false, error: err instanceof Error ? err.message : "Tool execution failed" };
       }
     }
-    return { ok: false, error: `Unknown tool: ${toolId}` };
+    return { status: false, error: `Unknown tool: ${toolId}` };
   }
 
   const parsed = registryTool.inputSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: "Invalid input" };
+    return { status: false, error: "Invalid input" };
   }
 
   try {
     const output = await withTimeout(registryTool.handler(parsed.data), TOOL_TIMEOUT_MS, toolId);
-    return { ok: true, output };
+    return { status: true, output };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Tool execution failed";
-    return { ok: false, error: message };
+    return { status: false, error: message };
   }
 }

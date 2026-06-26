@@ -1,6 +1,5 @@
-// context
-export { buildSemanticGraph } from "./context/semantic-graph";
-export { extractSemanticNodes } from "./context/extractor";
+// markdown
+export { buildPageMarkdown } from "./context/markdown-extractor";
 
 // registry
 export { toolRegistry } from "./registry/tool-registry";

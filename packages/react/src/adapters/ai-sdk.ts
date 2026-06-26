@@ -5,7 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import type { ChatAddToolOutputFunction, UIMessage } from "ai";
 import {
-  buildSemanticGraph,
+  buildPageMarkdown,
   toolRegistry,
   builtInTools,
   executeTool,
@@ -116,7 +116,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
       prepareSendMessagesRequest: ({ messages }) => ({
         body: {
           message: messages.at(-1),
-          semanticContext: buildSemanticGraph(),
+          pageContent: buildPageMarkdown(),
           tools: getSerializedToolsCached(),
           dataContext: runtimeStore.getState().dataContext,
           permissions: runtimeStore.getState().permissions,
@@ -153,7 +153,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
       input,
       permissions: runtimeStore.getState().permissions,
     });
-    if (!result.ok) {
+    if (!result.status) {
       addToolOutputRef.current?.({ tool: toolName, toolCallId, state: "output-error", errorText: result.error });
       return;
     }

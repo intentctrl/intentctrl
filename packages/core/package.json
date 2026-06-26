@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@intentctrl/types": "workspace:*",
+    "turndown": "^7.2.0",
     "zustand": "^5.0.0"
   },
   "peerDependencies": {
@@ -23,6 +24,7 @@
     "@intentctrl/eslint-config": "workspace:*",
     "@intentctrl/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
+    "@types/turndown": "^5.0.5",
     "eslint": "^9.39.1",
     "typescript": "5.9.2",
     "zod": "^4.4.3"

@@ -3,7 +3,7 @@ import { registerScoped } from "@intentctrl/core";
 import type { RegisteredTool } from "@intentctrl/core";
 import type { ZodType } from "zod";
 
-export function useAiTool<TSchema extends ZodType>(tool: RegisteredTool<TSchema>): void {
+export function useTool<TSchema extends ZodType>(tool: RegisteredTool<TSchema>): void {
   const scopeId = useId();
   const toolRef = useRef<RegisteredTool<TSchema>>(tool);
   toolRef.current = tool;
