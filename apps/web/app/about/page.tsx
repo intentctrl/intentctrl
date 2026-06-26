@@ -47,7 +47,7 @@ export default function AboutPage() {
           <h2 className="font-medium text-foreground text-xl">How it works</h2>
           <p>
             The AI never touches the DOM directly. Every action — whether it's a built-in tool like click or scroll, or
-            a custom tool you register via <code className="rounded bg-muted px-1.5 py-0.5 text-sm">useAiTool</code> —
+            a custom tool you register via <code className="rounded bg-muted px-1.5 py-0.5 text-sm">useTool</code> —
             is validated and executed by a runtime that respects the permissions you define. Your app stays in control.
           </p>
 

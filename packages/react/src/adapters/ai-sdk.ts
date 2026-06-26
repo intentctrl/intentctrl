@@ -21,7 +21,7 @@ import {
   EMPTY_SESSIONS,
 } from "@intentctrl/core";
 import type { BuiltInToolDefinition } from "@intentctrl/core";
-import type { IntentCtrlRequest, PaginatedChatSessionsResponse, SerializedTool } from "@intentctrl/types";
+import type { ChatRequest, PaginatedChatSessionsResponse, SerializedTool } from "@intentctrl/types";
 
 // Types
 
@@ -120,7 +120,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
           tools: getSerializedToolsCached(),
           dataContext: runtimeStore.getState().dataContext,
           permissions: runtimeStore.getState().permissions,
-        } as IntentCtrlRequest,
+        } as ChatRequest,
         api: `${apiUrlRef.current}/${activeSessionIdRef.current}`,
       }),
     });

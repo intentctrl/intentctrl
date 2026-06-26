@@ -3,7 +3,7 @@ import type { SerializedTool } from "./tools";
 
 export type { UIMessage } from "ai";
 
-export interface IntentCtrlRequest {
+export interface ChatRequest {
   message: UIMessage;
   pageContent: string;
   tools: SerializedTool[];

@@ -6,7 +6,7 @@ import type { RuntimePermissions } from "@intentctrl/core";
 import { IntentCtrlContext } from "./context";
 import { useIntentCtrlChat } from "../adapters/ai-sdk";
 
-const DEFAULT_API_URL = "http://localhost:4000/api/intent";
+const DEFAULT_API_URL = "http://localhost:4000/api/chat";
 
 export interface IntentCtrlProviderProps {
   apiUrl?: string;

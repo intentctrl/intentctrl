@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { FullWidthDivider } from "../common/full-width-divider";
+import { FullWidthDivider } from "@/components/common/full-width-divider";
 import { TextAnimate } from "@/components/ui/text-animate";
 
 export function FaqsSection() {
@@ -94,7 +94,7 @@ const questions = [
     id: "item-5",
     title: "What\u2019s the difference between built-in tools and custom tools?",
     content:
-      "Built-in tools (navigate, click, type, scroll, highlight, extract) handle common DOM interactions. Custom tools, registered via useAiTool or toolRegistry, call your actual application code \u2014 API calls, state mutations, anything.",
+      "Built-in tools (navigate, click, type, scroll, highlight, extract) handle common DOM interactions. Custom tools, registered via useTool or toolRegistry, call your actual application code \u2014 API calls, state mutations, anything.",
   },
   {
     id: "item-6",
