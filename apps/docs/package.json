@@ -11,8 +11,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^2.0.51",
-    "@ai-sdk/react": "^3.0.201",
+    "@ai-sdk/openai-compatible": "^3.0.0",
+    "@ai-sdk/react": "^4.0.2",
     "@fuma-translate/react": "^1.0.2",
     "@radix-ui/react-collapsible": "^1.1.13",
     "@radix-ui/react-navigation-menu": "^1.2.15",
@@ -20,7 +20,7 @@
     "@radix-ui/react-presence": "^1.1.6",
     "@radix-ui/react-scroll-area": "^1.2.11",
     "@takumi-rs/image-response": "^1.8.1",
-    "ai": "^6.0.199",
+    "ai": "^7.0.2",
     "class-variance-authority": "^0.7.1",
     "flexsearch": "^0.8.212",
     "fumadocs-core": "16.10.1",

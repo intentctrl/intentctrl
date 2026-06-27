@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import "./global.css";
 import { Outfit } from "next/font/google";
@@ -7,6 +8,14 @@ const fontSans = Outfit({
   variable: "--font-sans",
   subsets: ["latin"],
 });
+
+export const metadata: Metadata = {
+  title: "IntentCtrl",
+  description: "Give your users an assistant that thinks, acts, and confirms before it does.",
+  icons: {
+    icon: "/favicon.svg",
+  },
+};
 
 export default function Layout({ children }: LayoutProps<"/">) {
   return (

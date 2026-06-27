@@ -1,5 +1,5 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
+import { convertToModelMessages, isStepCount, streamText, tool, toUIMessageStream, createUIMessageStreamResponse, type UIMessage } from "ai";
 import { z } from "zod";
 import { source } from "@/lib/source";
 import { Document, type DocumentData } from "flexsearch";
@@ -89,8 +89,8 @@ export async function POST(req: Request, ctx: RouteContext<"/api/chat">) {
 
   const result = streamText({
     model: openaiCompatibleProvider.chatModel(LLM_MODEL),
-    system: systemPrompt,
-    stopWhen: stepCountIs(5),
+    instructions: systemPrompt,
+    stopWhen: isStepCount(5),
     tools: {
       search: searchTool,
     },
@@ -98,7 +98,8 @@ export async function POST(req: Request, ctx: RouteContext<"/api/chat">) {
     toolChoice: "auto",
   });
 
-  return result.toUIMessageStreamResponse();
+  const stream = toUIMessageStream({ stream: result.stream });
+  return createUIMessageStreamResponse({ stream });
 }
 
 const searchTool = tool({

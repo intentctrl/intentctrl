@@ -4,6 +4,24 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@types/node':
+      specifier: ^22.15.3
+      version: 22.19.21
+    ai:
+      specifier: ^7.0.2
+      version: 7.0.2
+    eslint:
+      specifier: ^9.39.1
+      version: 9.39.4
+    typescript:
+      specifier: 5.9.2
+      version: 5.9.2
+    zod:
+      specifier: ^4.4.3
+      version: 4.4.3
+
 importers:
 
   .:
@@ -21,11 +39,11 @@ importers:
   apps/docs:
     dependencies:
       '@ai-sdk/openai-compatible':
-        specifier: ^2.0.51
-        version: 2.0.51(zod@4.4.3)
+        specifier: ^3.0.0
+        version: 3.0.0(zod@4.4.3)
       '@ai-sdk/react':
-        specifier: ^3.0.201
-        version: 3.0.207(react@19.2.7)(zod@4.4.3)
+        specifier: ^4.0.2
+        version: 4.0.2(react@19.2.7)(zod@4.4.3)
       '@fuma-translate/react':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -48,8 +66,8 @@ importers:
         specifier: ^1.8.1
         version: 1.8.5(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       ai:
-        specifier: ^6.0.199
-        version: 6.0.205(zod@4.4.3)
+        specifier: ^7.0.2
+        version: 7.0.2(zod@4.4.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -261,19 +279,19 @@ importers:
         specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
-        specifier: ^22.15.3
+        specifier: 'catalog:'
         version: 22.19.21
       '@types/turndown':
         specifier: ^5.0.5
         version: 5.0.6
       eslint:
-        specifier: ^9.39.1
+        specifier: 'catalog:'
         version: 9.39.4(jiti@2.7.0)
       typescript:
-        specifier: 5.9.2
+        specifier: 'catalog:'
         version: 5.9.2
       zod:
-        specifier: ^4.4.3
+        specifier: 'catalog:'
         version: 4.4.3
 
   packages/eslint-config:
@@ -285,7 +303,7 @@ importers:
         specifier: ^16.2.0
         version: 16.2.9
       eslint:
-        specifier: ^9.39.1
+        specifier: 'catalog:'
         version: 9.39.4(jiti@2.7.0)
       eslint-config-prettier:
         specifier: ^10.1.1
@@ -306,7 +324,7 @@ importers:
         specifier: ^16.5.0
         version: 16.5.0
       typescript:
-        specifier: ^5.9.2
+        specifier: 'catalog:'
         version: 5.9.2
       typescript-eslint:
         specifier: ^8.50.0
@@ -315,8 +333,8 @@ importers:
   packages/react:
     dependencies:
       '@ai-sdk/react':
-        specifier: 4.0.0-canary.168
-        version: 4.0.0-canary.168(react@19.2.7)(zod@4.4.3)
+        specifier: 4.0.2
+        version: 4.0.2(react@19.2.7)(zod@4.4.3)
       '@intentctrl/core':
         specifier: workspace:*
         version: link:../core
@@ -324,8 +342,8 @@ importers:
         specifier: workspace:*
         version: link:../types
       ai:
-        specifier: 7.0.0-canary.165
-        version: 7.0.0-canary.165(zod@4.4.3)
+        specifier: 'catalog:'
+        version: 7.0.2(zod@4.4.3)
       react:
         specifier: ^19.2.0
         version: 19.2.7
@@ -340,7 +358,7 @@ importers:
         specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
-        specifier: ^22.15.3
+        specifier: 'catalog:'
         version: 22.19.21
       '@types/react':
         specifier: 19.2.2
@@ -349,13 +367,13 @@ importers:
         specifier: 19.2.2
         version: 19.2.2(@types/react@19.2.2)
       eslint:
-        specifier: ^9.39.1
+        specifier: 'catalog:'
         version: 9.39.4(jiti@2.7.0)
       typescript:
-        specifier: 5.9.2
+        specifier: 'catalog:'
         version: 5.9.2
       zod:
-        specifier: ^4.4.3
+        specifier: 'catalog:'
         version: 4.4.3
 
   packages/types:
@@ -367,80 +385,52 @@ importers:
         specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
-        specifier: ^22.15.3
+        specifier: 'catalog:'
         version: 22.19.21
       ai:
-        specifier: 7.0.0-canary.165
-        version: 7.0.0-canary.165(zod@4.4.3)
+        specifier: 'catalog:'
+        version: 7.0.2(zod@4.4.3)
       eslint:
-        specifier: ^9.39.1
+        specifier: 'catalog:'
         version: 9.39.4(jiti@2.7.0)
       typescript:
-        specifier: 5.9.2
+        specifier: 'catalog:'
         version: 5.9.2
 
   packages/typescript-config: {}
 
 packages:
 
-  '@ai-sdk/gateway@3.0.131':
-    resolution: {integrity: sha512-CnjOZdywQaUnCyZ0N5wVNm7Sm63+NeHDVZQJKFX2IDq+t03SLwiiuoi3ILTLPlM+YSOhkQ/pvIDoR4qa98Zp5A==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/gateway@4.0.0-canary.99':
-    resolution: {integrity: sha512-EyYENXVsGx6SVFdkMnJ043oSQbiMJcXhsR6tY7MQ8fMU5RxYP73JykF5SPW5bMo0ubpRD47k+ymw7C7OO0UgmQ==}
+  '@ai-sdk/gateway@4.0.2':
+    resolution: {integrity: sha512-Jz1BiiTSvhDsCBJrkFRSqLHDRMVjFtYk9GdbSi3UOqY+/epza+oIESMDzfN4m+YHT/1IYmNEmxaMfjXOvxKDjQ==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/mcp@2.0.0-canary.59':
-    resolution: {integrity: sha512-ssvf/hC6Ocl/7/RHmSsAMZhTjMwevTAPXuMEKNCEFoTOWQASLl6vSUbP0Jdgl82VdtyEoaVgWpdYqSUDWJ6Y+Q==}
+  '@ai-sdk/mcp@2.0.0':
+    resolution: {integrity: sha512-+N6gJ1AbcDk3+6asoEsdIojVmgEReKNcvWIT716pDL3AepGI6j7RJVdaRyhQLltwzTj0arwpwU4BBzvhOiCd/g==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai-compatible@2.0.51':
-    resolution: {integrity: sha512-A6qfyaVs4lxmRxRux6U3ViOa8mMbsSd0OaHghpei2MpiBT6791J4zFH5MN7kaW1tLfQ246rSC2DVTMOavsycjQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/provider-utils@4.0.29':
-    resolution: {integrity: sha512-uhukHaCBvqkwBHkT8C2PrnqKTCoLn3pdHXqtcR9I8ErH+flbzgW4o7VHSNIup9LRu+WBvZIZDQLsx6rwl2tiOA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/provider-utils@4.0.30':
-    resolution: {integrity: sha512-VO7I+vPffqI5sMnPoUq5DCSqKIgQIk/naJWRdQVpz2ma2zoprC/lqiJiUEl2s6DfvTD76TbhD3q39ROjlA6rGw==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/provider-utils@5.0.0-canary.46':
-    resolution: {integrity: sha512-wlXoWoo4OyppOuiQcYdGz5kn1S79Pb9lKXXR17keaJnjERlpTMd9XpQRrbC/0r23VI5QXJMuLJVQn+ymUE+Nbw==}
+  '@ai-sdk/openai-compatible@3.0.0':
+    resolution: {integrity: sha512-2Ln97FfBrIKTlV/F1uTfUl+Pwk76LqrfnT5+6vu2LnSNwvLdDhTP5uMfryIrxCaYvY2MZeL4ciM1UVd52k7wTQ==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider@3.0.10':
-    resolution: {integrity: sha512-Q3BZ27qfpYqnCYGvE3vt+Qi6LGOF9R5Nmzn+9JoM1lCRsD9mYaIhfJLkSunN48nfGXJ6n+XNV0J/XVpqGQl7Dw==}
-    engines: {node: '>=18'}
+  '@ai-sdk/provider-utils@5.0.0':
+    resolution: {integrity: sha512-zj66M02jc6ASYwIgWZowsooDUwaVngeNZQ3H10GwcPMZ+KR6gHMhcUuKl6tkai+JPXTKDyHY1pnszuxRtw2D4A==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider@4.0.0-canary.18':
-    resolution: {integrity: sha512-+XBwXEPkN+l/90bb7TaSK15jAq9ScsGrauJ/NLSGip0KX5Mf1pfEfqBWDuJMIYVRYHNdV1dDBy7JCoKUCQe/tA==}
+  '@ai-sdk/provider@4.0.0':
+    resolution: {integrity: sha512-fr9Gs89prDWiuox/T+kCA+i2cJkHpxU5S+tr4megjTzRC27ZsvFhwjU/+XrqqMbvBUlfmXxTOYWy8ng45dsjIg==}
     engines: {node: '>=22'}
 
-  '@ai-sdk/react@3.0.207':
-    resolution: {integrity: sha512-/wlJv214OQIqUDvoEFO4pqGYCmcXUJMEPcPc+1w2pQhf86onLv7My2+KlsKdK9XGATlI3hHpYaB3MbrpvLDzbQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      react: ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
-
-  '@ai-sdk/react@4.0.0-canary.168':
-    resolution: {integrity: sha512-MiAwqOvdiyQfJpGzD7wYMO2yTSo077MMP7kjI4iAJ4Yp4bJWplWGm+BcBbLkNCIvzOVWJWtlFhpNw1lhfTuP9A==}
+  '@ai-sdk/react@4.0.2':
+    resolution: {integrity: sha512-F+RMIWXfKE6Ugoq1hAKUOXv/vK4LPhL1uJ1VLakbxy71+MDvMyvagsa43NCJRGitrxLqZYFcJdUWRiL7shD8WQ==}
     engines: {node: '>=22'}
     peerDependencies:
       react: ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
@@ -2442,14 +2432,8 @@ packages:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
 
-  ai@6.0.205:
-    resolution: {integrity: sha512-F4akEGF41UdgJO3L4v+D5noVD1/czhJy6x0k9R/i1EXfxqrkBh/PdYSgRSLPiGFvrw76dzI8h4w3NYmLrTb8dw==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  ai@7.0.0-canary.165:
-    resolution: {integrity: sha512-nZsRzOrwJXZjRAnBYaZv7CLsNilKd/K/WNdo53zg4+JjLZYN9pllRq1AlAHQWHg7C1zrVR1AU3bNB2M3h4/8jg==}
+  ai@7.0.2:
+    resolution: {integrity: sha512-VMU08jHIDJnnKDrbC9AFa5ZsPpOTfAPRLvTRHtJk4FGAoeldmJROMxvZ2ak5lCjEJ2GP2OLPQbMRyEK8w0+S4A==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -4980,8 +4964,8 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  swr@2.4.1:
-    resolution: {integrity: sha512-2CC6CiKQtEwaEeNiqWTAw9PGykW8SR5zZX8MZk6TeAvEAnVS7Visz8WzphqgtQ8v2xz/4Q5K+j+SeMaKXeeQIA==}
+  swr@2.4.2:
+    resolution: {integrity: sha512-ej644Y2bvkIajfR32KGeSSdBXQW+ScjGjkybZgSE7kFpk9eGnV44XY9FJylXi+W75pavSX1PVNB57W5EbhGIYw==}
     peerDependencies:
       react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -5309,81 +5293,46 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.131(zod@4.4.3)':
+  '@ai-sdk/gateway@4.0.2(zod@4.4.3)':
     dependencies:
-      '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.0
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
       '@vercel/oidc': 3.2.0
       zod: 4.4.3
 
-  '@ai-sdk/gateway@4.0.0-canary.99(zod@4.4.3)':
+  '@ai-sdk/mcp@2.0.0(zod@4.4.3)':
     dependencies:
-      '@ai-sdk/provider': 4.0.0-canary.18
-      '@ai-sdk/provider-utils': 5.0.0-canary.46(zod@4.4.3)
-      '@vercel/oidc': 3.2.0
-      zod: 4.4.3
-
-  '@ai-sdk/mcp@2.0.0-canary.59(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider': 4.0.0-canary.18
-      '@ai-sdk/provider-utils': 5.0.0-canary.46(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.0
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
       pkce-challenge: 5.0.1
       zod: 4.4.3
 
-  '@ai-sdk/openai-compatible@2.0.51(zod@4.4.3)':
+  '@ai-sdk/openai-compatible@3.0.0(zod@4.4.3)':
     dependencies:
-      '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.30(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.0
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
       zod: 4.4.3
 
-  '@ai-sdk/provider-utils@4.0.29(zod@4.4.3)':
+  '@ai-sdk/provider-utils@5.0.0(zod@4.4.3)':
     dependencies:
-      '@ai-sdk/provider': 3.0.10
-      '@standard-schema/spec': 1.1.0
-      eventsource-parser: 3.1.0
-      zod: 4.4.3
-
-  '@ai-sdk/provider-utils@4.0.30(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider': 3.0.10
-      '@standard-schema/spec': 1.1.0
-      eventsource-parser: 3.1.0
-      zod: 4.4.3
-
-  '@ai-sdk/provider-utils@5.0.0-canary.46(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider': 4.0.0-canary.18
+      '@ai-sdk/provider': 4.0.0
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.0
       zod: 4.4.3
 
-  '@ai-sdk/provider@3.0.10':
+  '@ai-sdk/provider@4.0.0':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/provider@4.0.0-canary.18':
+  '@ai-sdk/react@4.0.2(react@19.2.7)(zod@4.4.3)':
     dependencies:
-      json-schema: 0.4.0
-
-  '@ai-sdk/react@3.0.207(react@19.2.7)(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.4.3)
-      ai: 6.0.205(zod@4.4.3)
+      '@ai-sdk/mcp': 2.0.0(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.0
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
+      ai: 7.0.2(zod@4.4.3)
       react: 19.2.7
-      swr: 2.4.1(react@19.2.7)
-      throttleit: 2.1.0
-    transitivePeerDependencies:
-      - zod
-
-  '@ai-sdk/react@4.0.0-canary.168(react@19.2.7)(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/mcp': 2.0.0-canary.59(zod@4.4.3)
-      '@ai-sdk/provider': 4.0.0-canary.18
-      '@ai-sdk/provider-utils': 5.0.0-canary.46(zod@4.4.3)
-      ai: 7.0.0-canary.165(zod@4.4.3)
-      react: 19.2.7
-      swr: 2.4.1(react@19.2.7)
+      swr: 2.4.2(react@19.2.7)
       throttleit: 2.1.0
     transitivePeerDependencies:
       - zod
@@ -6059,7 +6008,8 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@opentelemetry/api@1.9.1': {}
+  '@opentelemetry/api@1.9.1':
+    optional: true
 
   '@orama/orama@3.1.18': {}
 
@@ -7727,19 +7677,11 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ai@6.0.205(zod@4.4.3):
+  ai@7.0.2(zod@4.4.3):
     dependencies:
-      '@ai-sdk/gateway': 3.0.131(zod@4.4.3)
-      '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.4.3)
-      '@opentelemetry/api': 1.9.1
-      zod: 4.4.3
-
-  ai@7.0.0-canary.165(zod@4.4.3):
-    dependencies:
-      '@ai-sdk/gateway': 4.0.0-canary.99(zod@4.4.3)
-      '@ai-sdk/provider': 4.0.0-canary.18
-      '@ai-sdk/provider-utils': 5.0.0-canary.46(zod@4.4.3)
+      '@ai-sdk/gateway': 4.0.2(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.0
+      '@ai-sdk/provider-utils': 5.0.0(zod@4.4.3)
       zod: 4.4.3
 
   ajv-formats@3.0.1(ajv@8.20.0):
@@ -11049,7 +10991,7 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  swr@2.4.1(react@19.2.7):
+  swr@2.4.2(react@19.2.7):
     dependencies:
       dequal: 2.0.3
       react: 19.2.7
