@@ -64,7 +64,7 @@ export function HeroSection() {
           once
           className="text-center max-w-sm lg:max-w-lg text-muted-foreground text-sm wrap-break-word tracking-wider sm:text-lg"
         >
-          IntentCtrl is an open-source SDK that turns your application into an AI-native experience, enabling users to
+          An open-source SDK that turns your application into an AI-native experience, enabling users to
           talk to your app and take actions using natural language.
         </TextAnimate>
 

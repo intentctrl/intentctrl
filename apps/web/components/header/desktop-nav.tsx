@@ -6,7 +6,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { aboutLinks, aboutLinks2, platformLinks } from "@/components/header/nav-links";
+import { platformLinks } from "@/components/header/nav-links";
 import { LinkItem } from "@/components/header/sheard";
 import Link from "next/link";
 
@@ -31,29 +31,6 @@ export function DesktopNav() {
                   Get in touch
                 </Link>
               </p>
-            </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger className="bg-transparent">About</NavigationMenuTrigger>
-          <NavigationMenuContent className="bg-muted/50 p-1 pr-1.5 pb-1.5 dark:bg-background">
-            <div className="grid w-48 grid-cols-1 gap-2">
-              {/* <div className="grid w-lg grid-cols-2 gap-2"> */}
-              {/* <div className="rounded-lg space-y-2 border bg-popover p-2 shadow">
-                {aboutLinks.map((item, i) => (
-                  <NavigationMenuLink asChild key={`item-${item.label}-${i}`}>
-                    <LinkItem {...item} />
-                  </NavigationMenuLink>
-                ))}
-              </div> */}
-              <div className="space-y-2 p-3">
-                {aboutLinks2.map((item, i) => (
-                  <NavigationMenuLink href={item.href} key={`item-${item.label}-${i}`}>
-                    {item.icon}
-                    {item.label}
-                  </NavigationMenuLink>
-                ))}
-              </div>
             </div>
           </NavigationMenuContent>
         </NavigationMenuItem>

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Portal, PortalBackdrop } from "@/components/header/portal";
-import { aboutLinks, aboutLinks2, platformLinks } from "@/components/header/nav-links";
+import { platformLinks } from "@/components/header/nav-links";
 import { LinkItem } from "@/components/header/sheard";
 import { IconX, IconMenu2, IconBook } from "@tabler/icons-react";
 
@@ -47,28 +47,13 @@ export function MobileNav() {
                   {...link}
                 />
               ))}
-              <div className="my-2 border-t" />
+              <span className="text-sm">Docs</span>
               <LinkItem
                 className="rounded-lg p-2 active:bg-muted dark:active:bg-muted/50"
                 href="https://docs.intentctrl.com"
                 icon={<IconBook />}
                 label="Docs"
               />
-              <span className="text-sm">About</span>
-              {aboutLinks.map((link) => (
-                <LinkItem
-                  className="rounded-lg p-2 active:bg-muted dark:active:bg-muted/50"
-                  key={`about-${link.label}`}
-                  {...link}
-                />
-              ))}
-              {aboutLinks2.map((link) => (
-                <LinkItem
-                  className="rounded-lg p-2 active:bg-muted dark:active:bg-muted/50"
-                  key={`about-${link.label}`}
-                  {...link}
-                />
-              ))}
             </div>
             <div className="mt-5 flex flex-col gap-2">
               <Link

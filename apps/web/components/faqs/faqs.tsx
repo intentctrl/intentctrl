@@ -70,7 +70,7 @@ const questions = [
     id: "item-1",
     title: "Is this just a chatbot widget?",
     content:
-      "No. The widget is just one way to expose it. IntentCtrl is a runtime \u2014 it understands your app\u2019s actual structure and can take real actions inside it. The chat is the interface; the runtime is what makes it powerful.",
+      "No. The widget is just one way to expose it. It\u2019s a runtime \u2014 it understands your app\u2019s actual structure and can take real actions inside it. The chat is the interface; the runtime is what makes it powerful.",
   },
   {
     id: "item-2",
@@ -105,7 +105,7 @@ const questions = [
     id: "item-7",
     title: "Is there a hosted backend?",
     content:
-      "Not yet. It\u2019s on the roadmap. Right now you own the whole stack \u2014 which many developers prefer.",
+      "Not yet. The basic platform is self-hostable today \u2014 you deploy it yourself and own the whole stack. A fully managed cloud platform with a free tier is coming soon.",
   },
   {
     id: "item-8",

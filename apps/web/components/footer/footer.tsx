@@ -26,7 +26,7 @@ const footerLinks: FooterSection[] = [
       { title: "Documentation", href: "https://docs.intentctrl.com" },
       { title: "Features", href: "/#features" },
       { title: "Pricing", href: "/#pricing" },
-      { title: "Integration", href: "/#integrations" },
+      { title: "Integrations", href: "/#integrations" },
     ],
   },
   {
@@ -34,7 +34,8 @@ const footerLinks: FooterSection[] = [
     links: [
       { title: "About Us", href: "/about" },
       { title: "Privacy Policy", href: "/privacy-policy" },
-      { title: "Terms of Service", href: "/terms-of-service" },
+      { title: "Refund Policy", href: "/refund-policy" },
+      { title: "Terms and Conditions", href: "/terms-and-conditions" },
       { title: "FAQs", href: "/#faqs" },
     ],
   },
@@ -47,7 +48,7 @@ const footerLinks: FooterSection[] = [
         icon: <IconBrandX />,
       },
       {
-        title: "Github",
+        title: "GitHub",
         href: "https://github.com/intentctrl/intentctrl",
         icon: <IconBrandGithub />,
       },

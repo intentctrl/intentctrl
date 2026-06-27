@@ -33,14 +33,15 @@ export default function AboutPage() {
 
         <div className="mt-8 space-y-6 text-muted-foreground leading-relaxed">
           <p>
-            IntentCtrl is an open-source runtime that lets you embed an AI assistant directly into your application. Not
-            a chatbot wrapper — a runtime that understands your app's structure and can act inside it safely.
+            An open-source SDK and embedded AI runtime for React applications. Wrap your app in{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5 text-sm">IntentCtrlProvider</code>
+            , and the AI can understand what's on screen and take action through tools — all inside the browser.
           </p>
 
           <h2 className="font-medium text-foreground text-xl">Why we built it</h2>
           <p>
             Most AI integrations are shallow. A chat window that answers questions but can't do anything. We built
-            IntentCtrl to bridge that gap — giving users an assistant that can navigate, click, type, and call your
+            it to bridge that gap — giving users an assistant that can navigate, click, type, and call your
             actual application logic, all through a permission-checked execution engine.
           </p>
 
@@ -57,13 +58,17 @@ export default function AboutPage() {
             <Link href="https://github.com/intentctrl/intentctrl" className="text-primary hover:underline">
               GitHub
             </Link>
-            . No account required, no usage limits, no hidden costs. A cloud backend with session history, analytics,
-            and memory is on the roadmap — there will always be a free tier.
+            . No account required, no usage limits, no hidden costs. Use the{" "}
+            <Link href="http://app.intentctrl.com" className="text-primary hover:underline">
+              cloud platform
+            </Link>{" "}
+            with no backend setup, or self-host for free with unlimited usage. Session history, analytics, and memory
+            are included on the cloud platform.
           </p>
 
           <h2 className="font-medium text-foreground text-xl">The team</h2>
           <p>
-            We're a small team building in public. IntentCtrl is the kind of tool we wanted ourselves — an AI
+            We're a small team building in public. It's the kind of tool we wanted ourselves — an AI
             integration that respects your architecture, your permissions, and your users.
           </p>
         </div>

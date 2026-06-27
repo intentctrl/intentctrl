@@ -14,8 +14,8 @@ const data = [
   },
   {
     title: "Send an Email",
-    value: "hello@intentctrl.com",
-    href: "mailto:hello@intentctrl.com",
+    value: "contact@intentctrl.com",
+    href: "mailto:contact@intentctrl.com",
     icon: <IconMail />,
   },
   {
