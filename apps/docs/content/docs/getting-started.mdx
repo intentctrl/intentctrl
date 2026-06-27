@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Set up IntentCtrl in your app in a few minutes
+description: Set it up in your app in a few minutes
 icon: Rocket
 ---
 
@@ -46,14 +46,14 @@ Make sure `react`, `react-dom`, and `zod` are already in your project.
 <Step>
 ### Add the provider
 
-Wrap your application (or the part that needs AI) in `IntentCtrlProvider`. You need the URL of your AI backend and an API key.
+Wrap your application (or the part that needs AI) in `IntentCtrlProvider`. You need the URL of an AI backend and an API key. Use the [cloud platform](http://app.intentctrl.com) directly, or [self-host the backend](https://github.com/intentctrl) for free.
 
 ```tsx title="app/layout.tsx"
 import { IntentCtrlProvider } from "@intentctrl/react";
 
 export default function RootLayout({ children }) {
   return (
-    <IntentCtrlProvider apiUrl="https://api.example.com/chat" apiKey={process.env.NEXT_PUBLIC_API_KEY!}>
+    <IntentCtrlProvider apiUrl="http://app.intentctrl.com/api/chat" apiKey={process.env.NEXT_PUBLIC_API_KEY!}>
       {children}
     </IntentCtrlProvider>
   );

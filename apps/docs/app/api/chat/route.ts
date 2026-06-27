@@ -1,12 +1,22 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { convertToModelMessages, isStepCount, streamText, tool, toUIMessageStream, createUIMessageStreamResponse, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  isStepCount,
+  streamText,
+  tool,
+  toUIMessageStream,
+  createUIMessageStreamResponse,
+  type UIMessage,
+} from "ai";
 import { z } from "zod";
-import { source } from "@/lib/source";
+import { getLLMText, source } from "@/lib/source";
 import { Document, type DocumentData } from "flexsearch";
-import { ChatUIMessage, SearchTool } from "../../../components/ai/search";
+import { SearchTool } from "../../../components/ai/search";
+import { buildSystemPrompt } from "@/lib/ai";
 
 type ChatRequest = {
-  messages: ChatUIMessage[];
+  messages: UIMessage[];
+  url?: string;
 };
 
 interface CustomDocument extends DocumentData {
@@ -66,25 +76,25 @@ const openaiCompatibleProvider = createOpenAICompatible({
   includeUsage: true,
 });
 
-/** System prompt, you can update it to provide more specific information */
-const systemPrompt = [
-  "You are an AI assistant for a documentation site.",
-  "Use the `search` tool to retrieve relevant docs context before answering when needed.",
-  "The `search` tool returns raw JSON results from documentation. Use those results to ground your answer and cite sources as markdown links using the document `url` field when available.",
-  "If you cannot find the answer in search results, say you do not know and suggest a better search query.",
-].join("\n");
+async function getPageContext(url: string): Promise<string> {
+  const slug = url.replace(/^\//, "").split("/").filter(Boolean);
+  const page = source.getPage(slug);
+  if (!page) return "";
+
+  const text = await getLLMText(page);
+
+  return `\n\nThe user is currently viewing this page:\n\n${text}`;
+}
 
 export async function POST(req: Request, ctx: RouteContext<"/api/chat">) {
   const reqJson: ChatRequest = await req.json();
 
-  const messages = await convertToModelMessages<ChatUIMessage>(reqJson.messages, {
-    convertDataPart(part) {
-      if (part.type === "data-client")
-        return {
-          type: "text",
-          text: `[Client Context: ${JSON.stringify(part.data)}]`,
-        };
-    },
+  const messages = await convertToModelMessages<UIMessage>(reqJson.messages);
+
+  const pageContext = reqJson.url ? await getPageContext(reqJson.url) : "";
+
+  const systemPrompt = buildSystemPrompt({
+    pageContext,
   });
 
   const result = streamText({

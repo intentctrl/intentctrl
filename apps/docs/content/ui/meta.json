@@ -1,7 +1,7 @@
 {
   "title": "UI Components",
-  "description": "UI Components",
+  "description": "Reusable UI components for IntentCtrl chat interfaces",
   "icon": "PanelsTopLeft",
   "root": true,
-  "pages": ["---Introduction---", "index", "..."]
+  "pages": ["index"]
 }

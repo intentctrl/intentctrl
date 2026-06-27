@@ -1,49 +1,66 @@
 # IntentCtrl
 
-> The embedded AI runtime for React and Next.js applications.
+Embedded AI runtime for React applications.
 
-IntentCtrl is an open-source SDK that enables natural language interaction inside web applications.
-
-It allows AI to understand application context, navigate interfaces, interact with UI elements, and execute safe application actions.
-
----
-
-# Packages
-
-```text
-packages/
-├── core                 Framework-agnostic runtime engine
-├── react                React SDK
-├── types                Shared TypeScript types
-├── eslint-config        Shared ESLint configs
-└── typescript-config    Shared TypeScript configs
+```bash
+npm install @intentctrl/react
 ```
 
----
+## Usage
 
-# Tech Stack
+```tsx
+import { IntentCtrlProvider, useIntentCtrl, useTool } from "@intentctrl/react";
+import { z } from "zod";
 
-- TypeScript
-- TurboRepo
-- pnpm workspaces
-- React
-- ESLint
-- Vitest
+function App() {
+  return (
+    <IntentCtrlProvider apiUrl="http://app.intentctrl.com/api/chat" apiKey="...">
+      <Chat />
+    </IntentCtrlProvider>
+  );
+}
 
----
+function Chat() {
+  const { messages, sendMessage } = useIntentCtrl();
 
-# Repository Structure
+  useTool({
+    id: "add_todo",
+    description: "Add a new todo item to the list",
+    inputSchema: z.object({
+      title: z.string(),
+      priority: z.enum(["low", "medium", "high"]).optional(),
+    }),
+    handler: async ({ title, priority }) => {
+      return fetch("/api/todos", {
+        method: "POST",
+        body: JSON.stringify({ title, priority: priority ?? "medium" }),
+      }).then((r) => r.json());
+    },
+  });
 
-```text
-intentctrl/
-├── packages/
-├── turbo.json
-├── pnpm-workspace.yaml
-└── package.json
+  return (
+    <div>
+      {messages.map((m) => (
+        <p key={m.id}>{m.content}</p>
+      ))}
+      <input onKeyDown={(e) => {
+        if (e.key === "Enter") sendMessage(e.currentTarget.value);
+      }} />
+    </div>
+  );
+}
 ```
 
+- **Streaming chat** — real-time AI responses with a single hook
+- **Page-aware AI** — the assistant sees what the user sees
+- **Built-in tools** — navigate, click, type, scroll, highlight, extract
+- **Custom tools** — register your own functions with typed inputs
+- **Permissions** — control which tools the AI may use, per user
+- **Approval workflows** — user confirmation before sensitive actions
+- **Session management** — persistent conversations across page visits
+
+[Documentation](https://docs.intentctrl.com) &middot; [Cloud Platform](http://app.intentctrl.com)
+
 ---
 
-# Status
-
-IntentCtrl is currently in early development.
+MIT

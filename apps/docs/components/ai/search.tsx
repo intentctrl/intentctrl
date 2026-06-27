@@ -19,21 +19,12 @@ import { DefaultChatTransport, type Tool, type UIMessage, type UIToolInvocation 
 import { Markdown } from "../markdown";
 import { Presence } from "@radix-ui/react-presence";
 
-export type ChatUIMessage = UIMessage<
-  never,
-  {
-    client: {
-      location: string;
-    };
-  }
->;
-
 export type SearchTool = Tool<{ query: string; limit: number }>;
 
 const Context = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  chat: UseChatHelpers<ChatUIMessage>;
+  chat: UseChatHelpers<UIMessage>;
 } | null>(null);
 
 export function AISearchPanelHeader({ className, ...props }: ComponentProps<"div">) {
@@ -124,12 +115,6 @@ export function AISearchInput(props: ComponentProps<"form">) {
     void sendMessage({
       role: "user",
       parts: [
-        {
-          type: "data-client",
-          data: {
-            location: location.href,
-          },
-        },
         {
           type: "text",
           text: message,
@@ -262,7 +247,7 @@ const roleName: Record<string, string> = {
   assistant: "IntentCtrl",
 };
 
-function Message({ message, ...props }: { message: ChatUIMessage } & ComponentProps<"div">) {
+function Message({ message, ...props }: { message: UIMessage } & ComponentProps<"div">) {
   let markdown = "";
   const searchCalls: UIToolInvocation<SearchTool>[] = [];
 
@@ -316,10 +301,13 @@ function Message({ message, ...props }: { message: ChatUIMessage } & ComponentPr
 
 export function AISearch({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const chat = useChat<ChatUIMessage>({
+  const chat = useChat<UIMessage>({
     id: "search",
     transport: new DefaultChatTransport({
       api: "/api/chat",
+      body: () => ({
+        url: window.location.pathname,
+      }),
     }),
   });
 

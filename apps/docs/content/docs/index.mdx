@@ -1,14 +1,14 @@
 ---
 title: Overview
-description: What IntentCtrl is and why you'd use it
+description: What it is and why you'd use it
 icon: BookOpen
 ---
 
-IntentCtrl is an embedded AI runtime for React applications. It connects your app to an AI assistant that can understand what's on screen and take action through tools.
+An embedded AI runtime for React applications. It connects your app to an AI assistant that can understand what's on screen and take action through tools.
 
 ## How it works
 
-You wrap your application in `<IntentCtrlProvider>`, and every component beneath it gets access to the AI chat via `useIntentCtrl()`. When the user sends a message, IntentCtrl captures the current page as structured content, bundles your registered tools, and sends everything to your AI backend. The AI can respond naturally and call tools — both built-in DOM actions and your own custom functions.
+Wrap your application in `<IntentCtrlProvider>`, and every component beneath it gets access to the AI chat via `useIntentCtrl()`. When the user sends a message, the current page is captured as structured content, bundled with your registered tools, and sent to your AI backend. The AI can respond naturally and call tools — both built-in DOM actions and your own custom functions.
 
 ## What you get
 
@@ -22,11 +22,11 @@ You wrap your application in `<IntentCtrlProvider>`, and every component beneath
 
 ## Requirements
 
-IntentCtrl runs in the browser and requires:
+Runs in the browser and requires:
 
 - **React 19** and **React DOM 19**
 - **Zod 4** — used to define tool input schemas
-- **An AI backend** — a server that accepts chat requests and returns streaming responses
+- **An AI backend** — use the [cloud platform](http://app.intentctrl.com) with no setup required, or self-host for free with unlimited usage. The cloud platform provides session history, analytics, and memory.
 
 ## One package
 
@@ -60,4 +60,4 @@ IntentCtrl runs in the browser and requires:
   </CodeBlockTab>
 </CodeBlockTabs>
 
-That's all you install. Everything — the engine, the React bindings, the types — comes from `@intentctrl/react`.
+That's all you need. Everything comes in a single dependency.
