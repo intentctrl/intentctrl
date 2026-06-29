@@ -46,12 +46,14 @@ Every time the user sends a message, all registered tools are sent to the AI as 
       required: true,
     },
     inputSchema: {
-      description: "A Zod schema defining the tool's expected input. The AI only sees the JSON Schema representation, but inputs are validated with the full Zod schema before execution.",
+      description:
+        "A Zod schema defining the tool's expected input. The AI only sees the JSON Schema representation, but inputs are validated with the full Zod schema before execution.",
       type: "ZodType",
       required: true,
     },
     handler: {
-      description: "The function that runs when the AI calls the tool. Receives validated input, returns a value that's sent back to the AI.",
+      description:
+        "The function that runs when the AI calls the tool. Receives validated input, returns a value that's sent back to the AI.",
       type: "(input) => Promise<unknown>",
       required: true,
     },

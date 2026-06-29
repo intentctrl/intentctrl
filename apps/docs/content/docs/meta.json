@@ -3,12 +3,5 @@
   "description": "Documentation for the IntentCtrl SDK",
   "icon": "FileText",
   "root": true,
-  "pages": [
-    "index",
-    "getting-started",
-    "chat",
-    "tools",
-    "configuration",
-    "reference"
-  ]
+  "pages": ["index", "getting-started", "chat", "tools", "configuration", "reference"]
 }

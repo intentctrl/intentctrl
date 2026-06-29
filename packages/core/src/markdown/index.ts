@@ -6,11 +6,39 @@ function fmtAnnotation(sel: { css: string; xpath: string }): string {
 }
 
 const BLOCK_TAGS = new Set([
-  "address", "article", "aside", "blockquote", "details", "dialog",
-  "dd", "div", "dl", "dt", "fieldset", "figcaption", "figure",
-  "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header",
-  "hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section",
-  "table", "ul",
+  "address",
+  "article",
+  "aside",
+  "blockquote",
+  "details",
+  "dialog",
+  "dd",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "header",
+  "hgroup",
+  "hr",
+  "li",
+  "main",
+  "nav",
+  "ol",
+  "p",
+  "pre",
+  "section",
+  "table",
+  "ul",
 ]);
 
 export class MarkdownAnnotator {
@@ -86,8 +114,7 @@ export class MarkdownAnnotator {
 
   private addLinkRule(): void {
     this.service.addRule("md-link", {
-      filter: (node: any) =>
-        node.nodeName === "A" && !!node.getAttribute("href"),
+      filter: (node: any) => node.nodeName === "A" && !!node.getAttribute("href"),
       replacement: (content, node) => {
         const href = node.getAttribute("href") || "";
         const title = node.getAttribute("title");
@@ -116,10 +143,7 @@ export class MarkdownAnnotator {
       filter: ["ul", "ol"],
       replacement: (content, node) => {
         const parent = node.parentNode as any;
-        const isNestedList =
-          parent &&
-          parent.nodeName === "LI" &&
-          parent.lastElementChild === node;
+        const isNestedList = parent && parent.nodeName === "LI" && parent.lastElementChild === node;
         if (isNestedList) return `\n${content}`;
         return `\n\n${content}${this.annotate(node)}\n\n`;
       },
@@ -130,19 +154,14 @@ export class MarkdownAnnotator {
     this.service.addRule("md-listItem", {
       filter: "li",
       replacement: (content, node, options) => {
-        let text = content
-          .replace(/^\n+/, "")
-          .replace(/\n+$/, "\n")
-          .replace(/\n/gm, "\n    ");
+        let text = content.replace(/^\n+/, "").replace(/\n+$/, "\n").replace(/\n/gm, "\n    ");
 
         let prefix = (options.bulletListMarker || "-") + "   ";
         const parent = node.parentNode as any;
 
         if (parent && parent.nodeName === "OL") {
           const start = parent.getAttribute?.("start");
-          const children = Array.from(
-            parent.children || parent.childNodes || [],
-          ).filter((n: any) => n.nodeType === 1);
+          const children = Array.from(parent.children || parent.childNodes || []).filter((n: any) => n.nodeType === 1);
           const index = children.indexOf(node);
           prefix = (start ? Number(start) + index : index + 1) + ".  ";
         }
@@ -165,16 +184,12 @@ export class MarkdownAnnotator {
 
   private addCodeBlockRule(): void {
     this.service.addRule("md-codeBlock", {
-      filter: (node: any) =>
-        node.nodeName === "PRE" &&
-        node.firstChild &&
-        node.firstChild.nodeName === "CODE",
+      filter: (node: any) => node.nodeName === "PRE" && node.firstChild && node.firstChild.nodeName === "CODE",
       replacement: (_content, node) => {
         const codeNode = node.firstChild as any;
         if (!codeNode) return "";
         const className = codeNode.getAttribute?.("class") || "";
-        const language =
-          (className.match(/language-(\S+)/) || [null, ""])[1] || "";
+        const language = (className.match(/language-(\S+)/) || [null, ""])[1] || "";
         const code = codeNode.textContent || "";
 
         const fenceChar = "`";
@@ -212,18 +227,8 @@ export class MarkdownAnnotator {
     this.service.addRule("md-textInput", {
       filter: (node: any) => {
         if ((node.nodeName || "").toLowerCase() !== "input") return false;
-        const type = (
-          node.getAttribute?.("type") || "text"
-        ).toLowerCase();
-        return [
-          "text",
-          "email",
-          "password",
-          "search",
-          "url",
-          "tel",
-          "number",
-        ].includes(type);
+        const type = (node.getAttribute?.("type") || "text").toLowerCase();
+        return ["text", "email", "password", "search", "url", "tel", "number"].includes(type);
       },
       replacement: (_content, node) => {
         const placeholder = node.getAttribute?.("placeholder");
@@ -239,16 +244,12 @@ export class MarkdownAnnotator {
     this.service.addRule("md-checkboxRadio", {
       filter: (node: any) => {
         if ((node.nodeName || "").toLowerCase() !== "input") return false;
-        const type = (
-          node.getAttribute?.("type") || ""
-        ).toLowerCase();
+        const type = (node.getAttribute?.("type") || "").toLowerCase();
         return type === "checkbox" || type === "radio";
       },
       replacement: (_content, node) => {
         const label = node.getAttribute?.("aria-label");
-        const type = (
-          node.getAttribute?.("type") || ""
-        ).toLowerCase();
+        const type = (node.getAttribute?.("type") || "").toLowerCase();
         const symbol = type === "radio" ? "( )" : "[ ]";
         if (label) return `${symbol} ${label}${this.annotate(node)}`;
         return `${symbol}${this.annotate(node)}`;
@@ -260,9 +261,7 @@ export class MarkdownAnnotator {
     this.service.addRule("md-fileInput", {
       filter: (node: any) => {
         if ((node.nodeName || "").toLowerCase() !== "input") return false;
-        return (
-          (node.getAttribute?.("type") || "").toLowerCase() === "file"
-        );
+        return (node.getAttribute?.("type") || "").toLowerCase() === "file";
       },
       replacement: (_content, node) => {
         return `[Choose File]${this.annotate(node)}`;
@@ -274,10 +273,7 @@ export class MarkdownAnnotator {
     this.service.addRule("md-select", {
       filter: "select",
       replacement: (_content, node) => {
-        const label =
-          node.getAttribute?.("aria-label") ||
-          node.getAttribute?.("name") ||
-          "select";
+        const label = node.getAttribute?.("aria-label") || node.getAttribute?.("name") || "select";
         return `[▼ ${label}]${this.annotate(node)}`;
       },
     });
@@ -314,11 +310,7 @@ export class MarkdownAnnotator {
       filter: (node: any) => {
         if ((node.nodeName || "").toLowerCase() !== "div") return false;
         const children = Array.from(node.childNodes || []);
-        return !children.some(
-          (child: any) =>
-            child.nodeType === 1 &&
-            BLOCK_TAGS.has(child.nodeName.toLowerCase()),
-        );
+        return !children.some((child: any) => child.nodeType === 1 && BLOCK_TAGS.has(child.nodeName.toLowerCase()));
       },
       replacement: (content, node) => {
         const text = content.trim();

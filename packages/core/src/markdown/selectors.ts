@@ -25,9 +25,7 @@ function getParent(node: any): any {
 function getElementChildren(node: any): any[] {
   if (node.children) return Array.from(node.children);
   if (node.childNodes) {
-    return Array.from(node.childNodes as ArrayLike<any>).filter(
-      (n: any) => n.nodeType === 1,
-    );
+    return Array.from(node.childNodes as ArrayLike<any>).filter((n: any) => n.nodeType === 1);
   }
   return [];
 }
@@ -41,12 +39,7 @@ function getClasses(node: any): string[] {
 }
 
 function isRootTag(tag: string): boolean {
-  return (
-    tag === "body" ||
-    tag === "html" ||
-    tag === "#document" ||
-    tag.startsWith("x-turndown")
-  );
+  return tag === "body" || tag === "html" || tag === "#document" || tag.startsWith("x-turndown");
 }
 
 function looksGenerated(value: string): boolean {
@@ -96,11 +89,7 @@ function countSameTagPosition(node: any): {
   return { hasSiblings, index };
 }
 
-function matchesTagAndClasses(
-  candidate: any,
-  tag: string,
-  classes: string[],
-): boolean {
+function matchesTagAndClasses(candidate: any, tag: string, classes: string[]): boolean {
   if (getTagName(candidate) !== tag) return false;
   const candidateClasses = getClasses(candidate);
   return classes.every((c) => candidateClasses.includes(c));
@@ -120,9 +109,7 @@ function getUniqueSegment(node: any): string {
     const parent = getParent(node);
     if (parent && isElement(parent)) {
       const siblings = getElementChildren(parent);
-      const matches = siblings.filter((s: any) =>
-        matchesTagAndClasses(s, tag, cls),
-      );
+      const matches = siblings.filter((s: any) => matchesTagAndClasses(s, tag, cls));
       if (matches.length === 1) {
         return classSelector;
       }
@@ -135,8 +122,7 @@ function getUniqueSegment(node: any): string {
   }
 
   const { hasSiblings, index } = countSameTagPosition(node);
-  const classPart =
-    cls.length > 0 ? `.${cls.map(cssEscape).join(".")}` : "";
+  const classPart = cls.length > 0 ? `.${cls.map(cssEscape).join(".")}` : "";
 
   if (hasSiblings) {
     return `${tag}${classPart}:nth-of-type(${index})`;
@@ -197,10 +183,7 @@ export function computeXPath(el: any): string {
   return "//" + parts.join("/");
 }
 
-export function computeSelectors(
-  node: any,
-  types: SelectorType[],
-): SelectorResult {
+export function computeSelectors(node: any, types: SelectorType[]): SelectorResult {
   const result: SelectorResult = { css: "", xpath: "" };
   if (types.includes("css")) result.css = computeCSSSelector(node);
   if (types.includes("xpath")) result.xpath = computeXPath(node);

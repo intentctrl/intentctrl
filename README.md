@@ -43,9 +43,11 @@ function Chat() {
       {messages.map((m) => (
         <p key={m.id}>{m.content}</p>
       ))}
-      <input onKeyDown={(e) => {
-        if (e.key === "Enter") sendMessage(e.currentTarget.value);
-      }} />
+      <input
+        onKeyDown={(e) => {
+          if (e.key === "Enter") sendMessage(e.currentTarget.value);
+        }}
+      />
     </div>
   );
 }

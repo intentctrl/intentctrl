@@ -45,8 +45,8 @@ export default function RefundPolicyPage() {
           <h2 className="font-medium text-foreground text-xl">Nature of our services</h2>
           <p>
             We provide a cloud platform (app.intentctrl.com) that offers session history, analytics, memory, and related
-            infrastructure for the IntentCtrl SDK. Plans are billed on a subscription basis and provide access to
-            hosted services rather than downloadable goods.
+            infrastructure for the IntentCtrl SDK. Plans are billed on a subscription basis and provide access to hosted
+            services rather than downloadable goods.
           </p>
 
           <h2 className="font-medium text-foreground text-xl">General rule: fees are non-refundable</h2>
@@ -83,8 +83,8 @@ export default function RefundPolicyPage() {
 
           <h2 className="font-medium text-foreground text-xl">Third-party fees</h2>
           <p>
-            Fees paid directly to third parties (for example, LLM providers whose API keys you configure) are subject
-            to those vendors&apos; refund policies. We do not control or guarantee refunds for third-party services.
+            Fees paid directly to third parties (for example, LLM providers whose API keys you configure) are subject to
+            those vendors&apos; refund policies. We do not control or guarantee refunds for third-party services.
           </p>
 
           <h2 className="font-medium text-foreground text-xl">Changes to this policy</h2>

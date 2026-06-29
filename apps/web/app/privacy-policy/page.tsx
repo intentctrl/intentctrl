@@ -35,7 +35,9 @@ export default function PrivacyPolicyPage() {
           <p>
             This Privacy Policy explains how IntentCtrl ("we," "us," or "our") collects, uses, discloses, and protects
             information when you visit{" "}
-            <Link href="https://intentctrl.com" className="text-primary hover:underline">intentctrl.com</Link>{" "}
+            <Link href="https://intentctrl.com" className="text-primary hover:underline">
+              intentctrl.com
+            </Link>{" "}
             (the "Site") or use the IntentCtrl SDK, cloud platform, and related services (together with the Site, the
             "Services"). By using the Services, you agree to this policy and our{" "}
             <Link href="/terms-and-conditions" className="text-primary hover:underline">
@@ -65,8 +67,8 @@ export default function PrivacyPolicyPage() {
               <Link href="http://app.intentctrl.com" className="text-primary hover:underline">
                 cloud platform
               </Link>
-              , we may collect session history, tool usage, and analytics to provide and improve the
-              service. Self-hosted deployments send no data to us.
+              , we may collect session history, tool usage, and analytics to provide and improve the service.
+              Self-hosted deployments send no data to us.
             </li>
           </ul>
 
@@ -108,13 +110,13 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="font-medium text-foreground text-xl">SDK and your data</h2>
           <p>
-            The SDK runs entirely in the browser. When self-hosted, it communicates only with the LLM
-            endpoint you configure — we do not have access to those requests or responses.             If you use the{" "}
+            The SDK runs entirely in the browser. When self-hosted, it communicates only with the LLM endpoint you
+            configure — we do not have access to those requests or responses. If you use the{" "}
             <Link href="http://app.intentctrl.com" className="text-primary hover:underline">
               cloud platform
             </Link>
-            , session history and tool usage are stored to provide the service. You are
-            responsible for reviewing your chosen LLM provider's privacy policy.
+            , session history and tool usage are stored to provide the service. You are responsible for reviewing your
+            chosen LLM provider's privacy policy.
           </p>
 
           <h2 className="font-medium text-foreground text-xl">Data retention</h2>
@@ -162,7 +164,7 @@ export default function PrivacyPolicyPage() {
           <p>
             For privacy questions or requests:{" "}
             <Link href="mailto:contact@intentctrl.com" className="text-primary hover:underline">
-contact@intentctrl.com
+              contact@intentctrl.com
             </Link>
           </p>
         </div>

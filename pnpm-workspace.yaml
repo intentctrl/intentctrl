@@ -9,7 +9,7 @@ allowBuilds:
 
 catalog:
   typescript: 5.9.2
-  eslint: ^9.39.1
+  eslint: ^9.39.4
   "@types/node": ^22.15.3
   zod: ^4.4.3
   ai: ^7.0.2

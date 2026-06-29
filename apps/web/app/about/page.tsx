@@ -34,15 +34,15 @@ export default function AboutPage() {
         <div className="mt-8 space-y-6 text-muted-foreground leading-relaxed">
           <p>
             An open-source SDK and embedded AI runtime for React applications. Wrap your app in{" "}
-            <code className="rounded bg-muted px-1.5 py-0.5 text-sm">IntentCtrlProvider</code>
-            , and the AI can understand what's on screen and take action through tools — all inside the browser.
+            <code className="rounded bg-muted px-1.5 py-0.5 text-sm">IntentCtrlProvider</code>, and the AI can
+            understand what's on screen and take action through tools — all inside the browser.
           </p>
 
           <h2 className="font-medium text-foreground text-xl">Why we built it</h2>
           <p>
-            Most AI integrations are shallow. A chat window that answers questions but can't do anything. We built
-            it to bridge that gap — giving users an assistant that can navigate, click, type, and call your
-            actual application logic, all through a permission-checked execution engine.
+            Most AI integrations are shallow. A chat window that answers questions but can't do anything. We built it to
+            bridge that gap — giving users an assistant that can navigate, click, type, and call your actual application
+            logic, all through a permission-checked execution engine.
           </p>
 
           <h2 className="font-medium text-foreground text-xl">How it works</h2>
@@ -68,8 +68,8 @@ export default function AboutPage() {
 
           <h2 className="font-medium text-foreground text-xl">The team</h2>
           <p>
-            We're a small team building in public. It's the kind of tool we wanted ourselves — an AI
-            integration that respects your architecture, your permissions, and your users.
+            We're a small team building in public. It's the kind of tool we wanted ourselves — an AI integration that
+            respects your architecture, your permissions, and your users.
           </p>
         </div>
       </div>

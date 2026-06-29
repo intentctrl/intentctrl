@@ -10,9 +10,7 @@ export interface ExecuteToolParams {
   permissions: RuntimePermissions;
 }
 
-export type ExecuteToolResult =
-  | { status: true; output: unknown }
-  | { status: false; error: string };
+export type ExecuteToolResult = { status: true; output: unknown } | { status: false; error: string };
 
 const TOOL_TIMEOUT_MS = 15_000;
 

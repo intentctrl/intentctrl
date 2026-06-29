@@ -121,7 +121,8 @@ Registers a custom tool for the AI to call. The tool is available while the comp
       default: "false",
     },
     handler: {
-      description: "The function that runs when the AI calls the tool. Receives validated input, returns a value sent back to the AI.",
+      description:
+        "The function that runs when the AI calls the tool. Receives validated input, returns a value sent back to the AI.",
       type: "(input) => Promise<unknown>",
       required: true,
     },
