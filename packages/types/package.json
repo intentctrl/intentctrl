@@ -1,8 +1,37 @@
 {
   "name": "@intentctrl/types",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "Shared TypeScript types for IntentCtrl",
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "intent",
+    "typescript",
+    "types",
+    "llm",
+    "agents"
+  ],
+  "contributors": [
+    {
+      "name": "Swarup Kanade",
+      "url": "https://github.com/swarupkanade"
+    },
+    {
+      "name": "Omkar Kanade",
+      "url": "https://github.com/omkarkanade"
+    }
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/intentctrl/intentctrl",
+    "directory": "packages/types"
+  },
+  "homepage": "https://intentctrl.com",
+  "bugs": {
+    "url": "https://github.com/intentctrl/intentctrl/issues"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -29,6 +58,10 @@
     "tsdown": "catalog:",
     "typescript": "catalog:"
   },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
   "publishConfig": {
     "access": "public"
   }

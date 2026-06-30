@@ -1,8 +1,38 @@
 {
   "name": "@intentctrl/core",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "Framework-agnostic engine for IntentCtrl",
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "intent",
+    "framework",
+    "llm",
+    "tools",
+    "agents",
+    "engine"
+  ],
+  "contributors": [
+    {
+      "name": "Swarup Kanade",
+      "url": "https://github.com/swarupkanade"
+    },
+    {
+      "name": "Omkar Kanade",
+      "url": "https://github.com/omkarkanade"
+    }
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/intentctrl/intentctrl",
+    "directory": "packages/core"
+  },
+  "homepage": "https://intentctrl.com",
+  "bugs": {
+    "url": "https://github.com/intentctrl/intentctrl/issues"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -35,6 +65,10 @@
     "typescript": "catalog:",
     "zod": "catalog:"
   },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
   "publishConfig": {
     "access": "public"
   }
