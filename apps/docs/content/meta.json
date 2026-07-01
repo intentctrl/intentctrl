@@ -2,7 +2,9 @@
   "pages": [
     "index",
     "---Browse---",
-    "...",
+    "docs",
+    "ui",
+    "changelogs",
     "---Agent---",
     "[Bot][llms.txt](/llms.txt)",
     "[Bot][llms-full.txt](/llms-full.txt)"

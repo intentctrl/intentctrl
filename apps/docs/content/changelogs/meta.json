@@ -1,0 +1,7 @@
+{
+  "title": "Changelogs",
+  "description": "Changelogs for packages and apps",
+  "icon": "History",
+  "root": true,
+  "pages": ["index", "packages-changelogs", "apps-changelogs"]
+}
