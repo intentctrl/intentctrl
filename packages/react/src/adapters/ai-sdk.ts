@@ -22,6 +22,7 @@ import {
 } from "@intentctrl/core";
 import type { BuiltInToolDefinition } from "@intentctrl/core";
 import type { ChatRequest, PaginatedChatSessionsResponse, SerializedTool } from "@intentctrl/types";
+import type { IntentCtrlChat } from "../provider/context";
 
 // Types
 
@@ -36,26 +37,9 @@ export interface SessionState {
   initState: SessionInitState;
 }
 
-export interface UseIntentCtrlChatReturn {
-  messages: UIMessage[];
-  sendMessage: (text: string) => Promise<void>;
-  status: "submitted" | "streaming" | "ready" | "error";
-  stop: () => void;
-  error?: string;
-  approveToolCall: (toolCallId: string) => Promise<void>;
-  denyToolCall: (toolCallId: string) => void;
-  /** Switch to an existing session by ID — loads its messages and persists the choice. */
-  switchSession: (sessionId: string) => Promise<void>;
-  /** Create a brand-new session, persist it, clear messages. Does NOT send anything. */
-  newSession: () => Promise<void>;
-  /** Re-fetch the sessions list. */
-  refreshSessions: () => Promise<void>;
-  session: SessionState;
-}
-
 // Hook
 
-export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrlChatReturn {
+export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlChat {
   const apiUrlRef = useRef(apiUrl);
   const apiKeyRef = useRef(apiKey);
   useEffect(() => {
@@ -215,28 +199,37 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
   );
 
   /**
-   * Create a fresh session, make it active, clear the message list.
-   * Does NOT send any message — that's the caller's job.
+   * Reset to a clean state without creating a server session.
+   * Clears the active session, messages, and shows the "Ask anything" empty state.
+   * The next sendMessage will lazily create a session on the server.
    */
   const newSession = useCallback(async () => {
     cancelPendingApprovals("New session started — action cancelled");
     setInitState("loading");
-    try {
-      const visitorId = await getOrCreateVisitorId();
-      const created = await createSession(apiUrlRef.current, apiKeyRef.current, visitorId);
-      if (!created) throw new Error("Session creation failed");
 
-      // Clear messages immediately for snappy UX before activateSessionId sets them.
-      setMessagesRef.current?.([]);
-      await activateSessionId(created.id);
+    // Clear active session from storage and state (null = no session).
+    await saveActiveSessionId(null);
+    setActiveSession(null);
+    setMessagesRef.current?.([]);
 
-      // Refresh list in background — don't block the caller.
-      refreshSessions().catch(() => null);
-      setInitState("ready");
-    } catch {
-      setInitState("error");
-    }
-  }, [activateSessionId, refreshSessions, cancelPendingApprovals]);
+    // Refresh list in background — don't block the caller.
+    refreshSessions().catch(() => null);
+    setInitState("ready");
+  }, [setActiveSession, refreshSessions, cancelPendingApprovals]);
+
+  /**
+   * Create a session on the server, make it active, refresh the list.
+   * Used internally by sendMessage for lazy ChatGPT-style creation.
+   */
+  const createAndActivateSession = useCallback(async () => {
+    const visitorId = await getOrCreateVisitorId();
+    const created = await createSession(apiUrlRef.current, apiKeyRef.current, visitorId);
+    if (!created) throw new Error("Session creation failed");
+
+    setMessagesRef.current?.([]);
+    await activateSessionId(created.id);
+    refreshSessions().catch(() => null);
+  }, [activateSessionId, refreshSessions]);
 
   // Bootstrap on mount
   //
@@ -317,15 +310,16 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): UseIntentCtrl
     async (text: string) => {
       if (!activeSessionIdRef.current) {
         if (!sessionCreatingRef.current) {
-          sessionCreatingRef.current = newSession().finally(() => {
+          sessionCreatingRef.current = createAndActivateSession().finally(() => {
             sessionCreatingRef.current = null;
           });
         }
         await sessionCreatingRef.current;
       }
+      if (!activeSessionIdRef.current) return;
       chat.sendMessage({ text });
     },
-    [chat.sendMessage, newSession],
+    [chat.sendMessage, createAndActivateSession],
   );
 
   const approveToolCall = useCallback(

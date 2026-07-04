@@ -1,11 +1,11 @@
 import { createContext, useContext } from "react";
-import type { UIMessage } from "ai";
+import type { ChatStatus, UIMessage } from "ai";
 import type { SessionState } from "../adapters/ai-sdk";
 
-export interface IntentCtrlContextValue {
+export interface IntentCtrlChat {
   messages: UIMessage[];
   sendMessage: (text: string) => Promise<void>;
-  status: "submitted" | "streaming" | "ready" | "error";
+  status: ChatStatus;
   stop: () => void;
   error?: string;
   approveToolCall: (toolCallId: string) => Promise<void>;
@@ -16,10 +16,10 @@ export interface IntentCtrlContextValue {
   session: SessionState;
 }
 
-export const IntentCtrlContext = createContext<IntentCtrlContextValue | null>(null);
+export const IntentCtrlContext = createContext<IntentCtrlChat | null>(null);
 
 // Throws if called outside IntentCtrlProvider
-export function useIntentCtrlContext(): IntentCtrlContextValue {
+export function useIntentCtrlChatContext(): IntentCtrlChat {
   const ctx = useContext(IntentCtrlContext);
   if (!ctx) throw new Error("Must be used inside <IntentCtrlProvider>");
   return ctx;

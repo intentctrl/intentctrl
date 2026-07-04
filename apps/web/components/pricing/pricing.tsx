@@ -52,8 +52,8 @@ const plans: Plan[] = [
     info: "For developers building and testing production apps",
     highlighted: true,
     price: {
-      monthly: 10,
-      yearly: 100,
+      monthly: 8,
+      yearly: 80,
     },
     features: [
       "Everything in Free",
@@ -72,8 +72,8 @@ const plans: Plan[] = [
     name: "Pro",
     info: "For larger applications with higher usage limits",
     price: {
-      monthly: 30,
-      yearly: 300,
+      monthly: 24,
+      yearly: 240,
     },
     features: [
       "Everything in Builder",
@@ -108,7 +108,7 @@ export function PricingSection() {
               once
               startOnView
             >
-              Free and open source while we build.
+              Open source SDK. Paid cloud. Self-host anytime.
             </TextAnimate>
             <TextAnimate
               animation="blurIn"

@@ -40,7 +40,6 @@ const UIMessageShapeSchema = z.array(
     .object({
       id: z.string(),
       role: z.enum(["system", "user", "assistant", "tool"]),
-      content: z.string(),
       parts: z.array(z.unknown()),
       metadata: z.unknown().optional(),
     })
