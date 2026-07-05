@@ -1,326 +1,258 @@
 import TurndownService from "turndown";
-import { computeSelectors } from "./selectors";
+import { computeCSSSelector } from "./selectors";
 
-function fmtAnnotation(sel: { css: string; xpath: string }): string {
-  return `<!-- css="${sel.css}" xpath="${sel.xpath}" -->`;
+const NOISE_TAGS = "script,style,noscript,template,link,meta,nextjs-portal";
+const NOISE_SELECTORS =
+  '[data-ai-ignore],[aria-hidden="true"],[hidden],[data-nextjs-toast],[data-nextjs-dialog-overlay],' +
+  "[data-nextjs-error-overlay],[data-nextjs-refresh-root],[data-nextjs-scroll-focus-boundary]," +
+  "#__next-build-watcher,#__next-prerender-indicator,[data-vercel-toolbar],#__vercel-toolbar";
+
+const SKIP = "data-ai-md-skip";
+const MAX_STYLE_SCAN = 4000;
+
+const BLOCK_TAGS = new Set(
+  "address,article,aside,blockquote,details,dialog,dd,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,li,main,nav,ol,p,pre,section,table,ul".split(
+    ",",
+  ),
+);
+
+function isHidden(el: HTMLElement): boolean {
+  const s = window.getComputedStyle(el);
+  return s.display === "none" || s.visibility === "hidden" || s.visibility === "collapse";
 }
 
-const BLOCK_TAGS = new Set([
-  "address",
-  "article",
-  "aside",
-  "blockquote",
-  "details",
-  "dialog",
-  "dd",
-  "div",
-  "dl",
-  "dt",
-  "fieldset",
-  "figcaption",
-  "figure",
-  "footer",
-  "form",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "header",
-  "hgroup",
-  "hr",
-  "li",
-  "main",
-  "nav",
-  "ol",
-  "p",
-  "pre",
-  "section",
-  "table",
-  "ul",
-]);
+const block = (body: string) => (body ? `\n\n${body}\n\n` : "");
 
 export class MarkdownAnnotator {
-  private service: TurndownService;
+  private service = new TurndownService({
+    headingStyle: "atx",
+    bulletListMarker: "-",
+    codeBlockStyle: "fenced",
+    emDelimiter: "*",
+  });
+  private headings: { level: number; text: string }[] = [];
 
   constructor() {
-    this.service = new TurndownService({
-      headingStyle: "atx",
-      bulletListMarker: "-",
-      codeBlockStyle: "fenced",
-      emDelimiter: "*",
-    });
     this.installRules();
   }
 
-  get turndownService(): TurndownService {
-    return this.service;
+  convert(root: Node | string): string {
+    this.headings = [];
+    return this.service.turndown(this.prepare(root));
   }
 
-  convert(html: string): string {
-    return this.service.turndown(html);
+  // ---- noise pruning ----
+
+  private prepare(root: Node | string): HTMLElement {
+    if (typeof root === "string") {
+      const c = document.createElement("div");
+      c.innerHTML = root;
+      return this.prune(c);
+    }
+    const live = root as Element;
+    const attached = live.isConnected && typeof window !== "undefined";
+    if (attached) this.markHidden(live);
+    const clone = live.cloneNode(true) as HTMLElement;
+    if (attached) live.querySelectorAll(`[${SKIP}]`).forEach((el) => el.removeAttribute(SKIP));
+    clone.querySelectorAll(`[${SKIP}]`).forEach((n) => n.remove());
+    return this.prune(clone);
   }
 
-  private annotate(node: any): string {
-    const sel = computeSelectors(node, ["css", "xpath"]);
-    return fmtAnnotation(sel);
+  private prune(root: HTMLElement): HTMLElement {
+    root.querySelectorAll(NOISE_TAGS).forEach((n) => n.remove());
+    root.querySelectorAll(NOISE_SELECTORS).forEach((n) => n.remove());
+    return root;
   }
+
+  private markHidden(root: Element): void {
+    const all = root.querySelectorAll<HTMLElement>("*");
+    const limit = Math.min(all.length, MAX_STYLE_SCAN);
+    for (let i = 0; i < limit; i++) {
+      const el = all[i];
+      if (el && isHidden(el)) el.setAttribute(SKIP, "1");
+    }
+  }
+
+  // ---- annotation ----
+
+  private pushHeading(level: number, text: string): void {
+    while (this.headings.length) {
+      const last = this.headings[this.headings.length - 1];
+      if (!last || last.level < level) break;
+      this.headings.pop();
+    }
+    this.headings.push({ level, text });
+  }
+
+  private tag(node: any, withSection = false): string {
+    const css = computeCSSSelector(node);
+    if (!withSection) return `<!-- css="${css}" -->`;
+    const section = this.headings.map((h) => h.text).join(" > ");
+    return `<!-- css="${css}"${section ? ` section="${section.replace(/"/g, "'")}"` : ""} -->`;
+  }
+
+  // ---- rules ----
 
   private installRules(): void {
-    this.addHeadingRule();
-    this.addParagraphRule();
-    this.addLinkRule();
-    this.addImageRule();
-    this.addListRule();
-    this.addListItemRule();
-    this.addBlockquoteRule();
-    this.addCodeBlockRule();
-    this.addButtonRule();
-    this.addTextInputRule();
-    this.addCheckboxRadioRule();
-    this.addFileInputRule();
-    this.addSelectDropdownRule();
-    this.addTextareaRule();
-    this.addEditableRule();
-    this.addTextBlockRule();
-  }
+    const s = this.service;
 
-  // ---- Content rules ----
-
-  private addHeadingRule(): void {
-    this.service.addRule("md-heading", {
+    s.addRule("md-heading", {
       filter: ["h1", "h2", "h3", "h4", "h5", "h6"],
-      replacement: (content, node) => {
+      replacement: (content, node: any) => {
         const level = Number(node.nodeName.charAt(1));
         const text = content.replace(/\n/g, " ").trim();
         if (!text) return "";
-        const hashes = "#".repeat(level);
-        return `\n\n${hashes} ${text}${this.annotate(node)}\n\n`;
+        this.pushHeading(level, text);
+        return block(`${"#".repeat(level)} ${text}${this.tag(node)}`);
       },
     });
-  }
 
-  private addParagraphRule(): void {
-    this.service.addRule("md-paragraph", {
+    s.addRule("md-paragraph", {
       filter: "p",
       replacement: (content, node) => {
         const text = content.trim();
-        if (!text) return "";
-        return `\n\n${text}${this.annotate(node)}\n\n`;
+        return text ? block(`${text}${this.tag(node)}`) : "";
       },
     });
-  }
 
-  private addLinkRule(): void {
-    this.service.addRule("md-link", {
+    s.addRule("md-link", {
       filter: (node: any) => node.nodeName === "A" && !!node.getAttribute("href"),
-      replacement: (content, node) => {
+      replacement: (content, node: any) => {
         const href = node.getAttribute("href") || "";
         const title = node.getAttribute("title");
-        const titlePart = title ? ` "${title}"` : "";
-        return `[${content}](${href}${titlePart})${this.annotate(node)}`;
+        return `[${content}](${href}${title ? ` "${title}"` : ""})${this.tag(node, true)}`;
       },
     });
-  }
 
-  private addImageRule(): void {
-    this.service.addRule("md-image", {
+    s.addRule("md-image", {
       filter: "img",
-      replacement: (_content, node) => {
-        const alt = (node.getAttribute("alt") || "").replace(/\n/g, " ");
+      replacement: (_c, node: any) => {
         const src = node.getAttribute("src") || "";
-        const title = node.getAttribute("title");
-        const titlePart = title ? ` "${title}"` : "";
         if (!src) return "";
-        return `![${alt}](${src}${titlePart})${this.annotate(node)}`;
+        const alt = (node.getAttribute("alt") || "").replace(/\n/g, " ");
+        const title = node.getAttribute("title");
+        return `![${alt}](${src}${title ? ` "${title}"` : ""})${this.tag(node)}`;
       },
     });
-  }
 
-  private addListRule(): void {
-    this.service.addRule("md-list", {
+    s.addRule("md-list", {
       filter: ["ul", "ol"],
-      replacement: (content, node) => {
-        const parent = node.parentNode as any;
-        const isNestedList = parent && parent.nodeName === "LI" && parent.lastElementChild === node;
-        if (isNestedList) return `\n${content}`;
-        return `\n\n${content}${this.annotate(node)}\n\n`;
+      replacement: (content, node: any) => {
+        const parent = node.parentNode;
+        const nested = parent?.nodeName === "LI" && parent.lastElementChild === node;
+        return nested ? `\n${content}` : block(`${content}${this.tag(node)}`);
       },
     });
-  }
 
-  private addListItemRule(): void {
-    this.service.addRule("md-listItem", {
+    s.addRule("md-listItem", {
       filter: "li",
-      replacement: (content, node, options) => {
-        let text = content.replace(/^\n+/, "").replace(/\n+$/, "\n").replace(/\n/gm, "\n    ");
-
-        let prefix = (options.bulletListMarker || "-") + "   ";
-        const parent = node.parentNode as any;
-
-        if (parent && parent.nodeName === "OL") {
+      replacement: (content, node: any, options) => {
+        const text = content.replace(/^\n+/, "").replace(/\n+$/, "\n").replace(/\n/gm, "\n    ");
+        let prefix = `${options.bulletListMarker || "-"}   `;
+        const parent = node.parentNode;
+        if (parent?.nodeName === "OL") {
           const start = parent.getAttribute?.("start");
-          const children = Array.from(parent.children || parent.childNodes || []).filter((n: any) => n.nodeType === 1);
-          const index = children.indexOf(node);
-          prefix = (start ? Number(start) + index : index + 1) + ".  ";
+          const idx = Array.from(parent.children || []).indexOf(node);
+          prefix = `${start ? Number(start) + idx : idx + 1}.  `;
         }
-
-        return `${prefix}${text.replace(/\n$/, "")}${this.annotate(node)}\n`;
+        return `${prefix}${text.replace(/\n$/, "")}${this.tag(node)}\n`;
       },
     });
-  }
 
-  private addBlockquoteRule(): void {
-    this.service.addRule("md-blockquote", {
+    s.addRule("md-blockquote", {
       filter: "blockquote",
-      replacement: (content, node) => {
-        let text = content.replace(/^\n+|\n+$/g, "");
-        text = text.replace(/^/gm, "> ");
-        return `\n\n${text}${this.annotate(node)}\n\n`;
-      },
+      replacement: (content, node) =>
+        block(`${content.replace(/^\n+|\n+$/g, "").replace(/^/gm, "> ")}${this.tag(node)}`),
     });
-  }
 
-  private addCodeBlockRule(): void {
-    this.service.addRule("md-codeBlock", {
-      filter: (node: any) => node.nodeName === "PRE" && node.firstChild && node.firstChild.nodeName === "CODE",
-      replacement: (_content, node) => {
-        const codeNode = node.firstChild as any;
-        if (!codeNode) return "";
-        const className = codeNode.getAttribute?.("class") || "";
-        const language = (className.match(/language-(\S+)/) || [null, ""])[1] || "";
+    s.addRule("md-codeBlock", {
+      filter: (node: any) => node.nodeName === "PRE" && node.firstChild?.nodeName === "CODE",
+      replacement: (_c, node: any) => {
+        const codeNode = node.firstChild;
+        const lang = (codeNode.getAttribute?.("class") || "").match(/language-(\S+)/)?.[1] || "";
         const code = codeNode.textContent || "";
-
-        const fenceChar = "`";
-        let fenceSize = 3;
-        const fenceRe = new RegExp("^`{3,}", "gm");
-        let match;
-        while ((match = fenceRe.exec(code))) {
-          if (match[0].length >= fenceSize) fenceSize = match[0].length + 1;
-        }
-        const fence = fenceChar.repeat(fenceSize);
-
-        return `\n\n${fence}${language}\n${code.replace(/\n$/, "")}\n${fence}${this.annotate(node)}\n\n`;
+        const runs = (code.match(/`{3,}/g) || [""]).map((m: string) => m.length);
+        const fence = "`".repeat(Math.max(2, ...runs) + 1);
+        return block(`${fence}${lang}\n${code.replace(/\n$/, "")}\n${fence}${this.tag(node)}`);
       },
     });
-  }
 
-  // ---- Interactive element rules ----
+    // ---- interactive elements ----
 
-  private addButtonRule(): void {
-    this.service.addRule("md-button", {
+    const labeled = (name: string, filter: any, getLabel: (node: any) => string) =>
+      s.addRule(name, { filter, replacement: (_c, node: any) => `[${getLabel(node)}]${this.tag(node, true)}` });
+
+    labeled(
+      "md-textInput",
+      (node: any) =>
+        node.nodeName === "INPUT" &&
+        ["text", "email", "password", "search", "url", "tel", "number"].includes(
+          (node.getAttribute("type") || "text").toLowerCase(),
+        ),
+      (node) => node.getAttribute("placeholder") || node.getAttribute("name") || node.getAttribute("id") || "input",
+    );
+
+    labeled(
+      "md-fileInput",
+      (node: any) => node.nodeName === "INPUT" && (node.getAttribute("type") || "").toLowerCase() === "file",
+      () => "Choose File",
+    );
+
+    labeled(
+      "md-select",
+      "select",
+      (node) => `▼ ${node.getAttribute("aria-label") || node.getAttribute("name") || "select"}`,
+    );
+
+    labeled(
+      "md-textarea",
+      "textarea",
+      (node) => node.getAttribute("placeholder") || node.getAttribute("name") || "textarea",
+    );
+
+    s.addRule("md-checkboxRadio", {
+      filter: (node: any) =>
+        node.nodeName === "INPUT" && ["checkbox", "radio"].includes((node.getAttribute("type") || "").toLowerCase()),
+      replacement: (_c, node: any) => {
+        const symbol = (node.getAttribute("type") || "").toLowerCase() === "radio" ? "( )" : "[ ]";
+        const label = node.getAttribute("aria-label");
+        return `${symbol}${label ? ` ${label}` : ""}${this.tag(node, true)}`;
+      },
+    });
+
+    s.addRule("md-button", {
+      filter: (node: any) => node.nodeName === "BUTTON" || node.getAttribute?.("role") === "button",
+      replacement: (_c, node: any) => {
+        const text = (node.getAttribute("aria-label") || node.textContent || "").trim();
+        return text ? `**${text}**${this.tag(node, true)}` : "";
+      },
+    });
+
+    s.addRule("md-editable", {
       filter: (node: any) => {
-        const tag = (node.nodeName || "").toLowerCase();
-        const role = node.getAttribute?.("role") || "";
-        return tag === "button" || role === "button";
-      },
-      replacement: (_content, node) => {
-        const text = (node.textContent || "").trim();
-        if (!text) return "";
-        return `**${text}**${this.annotate(node)}`;
-      },
-    });
-  }
-
-  private addTextInputRule(): void {
-    this.service.addRule("md-textInput", {
-      filter: (node: any) => {
-        if ((node.nodeName || "").toLowerCase() !== "input") return false;
-        const type = (node.getAttribute?.("type") || "text").toLowerCase();
-        return ["text", "email", "password", "search", "url", "tel", "number"].includes(type);
-      },
-      replacement: (_content, node) => {
-        const placeholder = node.getAttribute?.("placeholder");
-        const name = node.getAttribute?.("name");
-        const id = node.getAttribute?.("id");
-        const label = placeholder || name || id || "input";
-        return `[${label}]${this.annotate(node)}`;
-      },
-    });
-  }
-
-  private addCheckboxRadioRule(): void {
-    this.service.addRule("md-checkboxRadio", {
-      filter: (node: any) => {
-        if ((node.nodeName || "").toLowerCase() !== "input") return false;
-        const type = (node.getAttribute?.("type") || "").toLowerCase();
-        return type === "checkbox" || type === "radio";
-      },
-      replacement: (_content, node) => {
-        const label = node.getAttribute?.("aria-label");
-        const type = (node.getAttribute?.("type") || "").toLowerCase();
-        const symbol = type === "radio" ? "( )" : "[ ]";
-        if (label) return `${symbol} ${label}${this.annotate(node)}`;
-        return `${symbol}${this.annotate(node)}`;
-      },
-    });
-  }
-
-  private addFileInputRule(): void {
-    this.service.addRule("md-fileInput", {
-      filter: (node: any) => {
-        if ((node.nodeName || "").toLowerCase() !== "input") return false;
-        return (node.getAttribute?.("type") || "").toLowerCase() === "file";
-      },
-      replacement: (_content, node) => {
-        return `[Choose File]${this.annotate(node)}`;
-      },
-    });
-  }
-
-  private addSelectDropdownRule(): void {
-    this.service.addRule("md-select", {
-      filter: "select",
-      replacement: (_content, node) => {
-        const label = node.getAttribute?.("aria-label") || node.getAttribute?.("name") || "select";
-        return `[▼ ${label}]${this.annotate(node)}`;
-      },
-    });
-  }
-
-  private addTextareaRule(): void {
-    this.service.addRule("md-textarea", {
-      filter: "textarea",
-      replacement: (_content, node) => {
-        const placeholder = node.getAttribute?.("placeholder");
-        const name = node.getAttribute?.("name");
-        const label = placeholder || name || "textarea";
-        return `[${label}]${this.annotate(node)}`;
-      },
-    });
-  }
-
-  private addEditableRule(): void {
-    this.service.addRule("md-editable", {
-      filter: (node: any) => {
-        const editable = node.getAttribute?.("contenteditable");
-        return editable !== null && editable !== "false";
+        const v = node.getAttribute?.("contenteditable");
+        return v != null && v !== "false";
       },
       replacement: (content, node) => {
         const text = content.trim();
-        if (!text) return "";
-        return `${text}${this.annotate(node)}`;
+        return text ? `${text}${this.tag(node, true)}` : "";
       },
     });
-  }
 
-  private addTextBlockRule(): void {
-    this.service.addRule("md-textBlock", {
-      filter: (node: any) => {
-        if ((node.nodeName || "").toLowerCase() !== "div") return false;
-        const children = Array.from(node.childNodes || []);
-        return !children.some((child: any) => child.nodeType === 1 && BLOCK_TAGS.has(child.nodeName.toLowerCase()));
-      },
+    s.addRule("md-textBlock", {
+      filter: (node: any) =>
+        node.nodeName === "DIV" &&
+        !Array.from(node.childNodes || []).some(
+          (c: any) => c.nodeType === 1 && BLOCK_TAGS.has(c.nodeName.toLowerCase()),
+        ),
       replacement: (content, node) => {
         const text = content.trim();
-        if (!text) return "";
-        return `\n\n${text}${this.annotate(node)}\n\n`;
+        return text ? block(`${text}${this.tag(node)}`) : "";
       },
     });
   }
 }
 
-export function toAnnotatedMarkdown(html: string): string {
-  return new MarkdownAnnotator().convert(html);
+export function toAnnotatedMarkdown(root: Node | string): string {
+  return new MarkdownAnnotator().convert(root);
 }
