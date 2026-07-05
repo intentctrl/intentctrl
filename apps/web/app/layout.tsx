@@ -19,9 +19,6 @@ const fontMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "IntentCtrl",
   description: "Give your users an assistant that thinks, acts, and confirms before it does.",
-  icons: {
-    icon: "/favicon.svg",
-  },
 };
 
 export default function RootLayout({

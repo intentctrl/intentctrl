@@ -18,9 +18,6 @@ const fontMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "IntentCtrl",
   description: "Chat widgets for IntentCtrl",
-  icons: {
-    icon: "/favicon.svg",
-  },
 };
 
 export default function RootLayout({

@@ -34,8 +34,8 @@ export function generate({ title, description, theme }: GenerateProps) {
         <span tw="ml-4 text-xl text-neutral-900 font-medium">{appName}</span>
       </div>
 
-      <h1 tw="mt-8 text-6xl text-center text-neutral-900 leading-[1.2] tracking-tighter max-w-2xl mx-auto">{title}</h1>
-      <p tw="text-center text-2xl text-neutral-800/90 max-w-2xl mx-auto leading-relaxed">{description}</p>
+      <h1 tw="mt-8 text-6xl text-center text-neutral-900 max-w-2xl mx-auto">{title}</h1>
+      <p tw="-mt-3 text-center text-4xl text-neutral-800/90 max-w-2xl mx-auto">{description}</p>
     </div>
   );
 }
