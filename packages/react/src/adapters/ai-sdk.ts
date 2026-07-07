@@ -2,7 +2,7 @@
 
 import { useRef, useCallback, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls, getToolName } from "ai";
 import type { ChatAddToolOutputFunction, UIMessage } from "ai";
 import {
   buildPageMarkdown,
@@ -69,7 +69,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
   // Internal refs
   const addToolOutputRef = useRef<ChatAddToolOutputFunction<UIMessage> | null>(null);
   const setMessagesRef = useRef<((msgs: UIMessage[]) => void) | null>(null);
-  const pendingApprovalsRef = useRef<Map<string, { toolName: string; toolCallId: string; input: unknown }>>(new Map());
+  const messagesRef = useRef<UIMessage[]>([]);
   const sessionCreatingRef = useRef<Promise<void> | null>(null);
   const serializedToolsCacheRef = useRef<{ version: number; tools: SerializedTool[] } | null>(null);
 
@@ -167,18 +167,6 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
     setSessionList(data);
   }, []);
 
-  const cancelPendingApprovals = useCallback((reason: string) => {
-    for (const [toolCallId, pending] of pendingApprovalsRef.current) {
-      addToolOutputRef.current?.({
-        tool: pending.toolName,
-        toolCallId,
-        state: "output-error",
-        errorText: reason,
-      });
-    }
-    pendingApprovalsRef.current.clear();
-  }, []);
-
   /**
    * Switch to an existing session by ID.
    * Loads its messages and updates the active session in storage.
@@ -186,7 +174,6 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
   const switchSession = useCallback(
     async (sessionId: string) => {
       if (sessionId === activeSessionIdRef.current) return;
-      cancelPendingApprovals("Session switched — action cancelled");
       setInitState("loading");
       try {
         await activateSessionId(sessionId);
@@ -195,7 +182,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
         setInitState("error");
       }
     },
-    [activateSessionId, cancelPendingApprovals],
+    [activateSessionId],
   );
 
   /**
@@ -204,7 +191,6 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
    * The next sendMessage will lazily create a session on the server.
    */
   const newSession = useCallback(async () => {
-    cancelPendingApprovals("New session started — action cancelled");
     setInitState("loading");
 
     // Clear active session from storage and state (null = no session).
@@ -215,7 +201,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
     // Refresh list in background — don't block the caller.
     refreshSessions().catch(() => null);
     setInitState("ready");
-  }, [setActiveSession, refreshSessions, cancelPendingApprovals]);
+  }, [setActiveSession, refreshSessions]);
 
   /**
    * Create a session on the server, make it active, refresh the list.
@@ -282,14 +268,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
     transport: transportRef.current,
     experimental_throttle: 50,
     onToolCall: async ({ toolCall }) => {
-      if (needsApproval(toolCall.toolName)) {
-        pendingApprovalsRef.current.set(toolCall.toolCallId, {
-          toolName: toolCall.toolName,
-          toolCallId: toolCall.toolCallId,
-          input: toolCall.input,
-        });
-        return;
-      }
+      if (needsApproval(toolCall.toolName)) return;
       await handleToolCall(toolCall.toolName, toolCall.toolCallId, toolCall.input);
     },
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
@@ -298,6 +277,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
 
   addToolOutputRef.current = chat.addToolOutput;
   setMessagesRef.current = chat.setMessages;
+  messagesRef.current = chat.messages;
 
   // sendMessage — lazy session creation
   //
@@ -322,27 +302,47 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
     [chat.sendMessage, createAndActivateSession],
   );
 
+  const getApprovalInfo = useCallback((toolCallId: string) => {
+    for (const msg of messagesRef.current) {
+      for (const part of msg.parts ?? []) {
+        if (!("toolCallId" in part)) continue;
+        if (part.toolCallId !== toolCallId) continue;
+        if (part.state !== "approval-requested") continue;
+        return { toolName: getToolName(part), input: part.input };
+      }
+    }
+    return null;
+  }, []);
+
   const approveToolCall = useCallback(
     async (toolCallId: string) => {
-      const pending = pendingApprovalsRef.current.get(toolCallId);
-      if (!pending) return;
-      pendingApprovalsRef.current.delete(toolCallId);
-      await handleToolCall(pending.toolName, toolCallId, pending.input);
+      const info = getApprovalInfo(toolCallId);
+      if (!info) return;
+      await handleToolCall(info.toolName, toolCallId, info.input);
     },
-    [handleToolCall],
+    [handleToolCall, getApprovalInfo],
   );
 
-  const denyToolCall = useCallback((toolCallId: string) => {
-    const pending = pendingApprovalsRef.current.get(toolCallId);
-    if (!pending) return;
-    pendingApprovalsRef.current.delete(toolCallId);
-    addToolOutputRef.current?.({
-      tool: pending.toolName,
-      toolCallId,
-      state: "output-error",
-      errorText: "User denied execution",
-    });
-  }, []);
+  const denyToolCall = useCallback(
+    (toolCallId: string) => {
+      const info = getApprovalInfo(toolCallId);
+      if (!info) return;
+      addToolOutputRef.current?.({
+        tool: info.toolName,
+        toolCallId,
+        state: "output-error",
+        errorText: "User denied execution",
+      });
+    },
+    [getApprovalInfo],
+  );
+
+  const clearSession = useCallback(async () => {
+    await saveActiveSessionId(null);
+    setActiveSession(null);
+    setMessagesRef.current?.([]);
+    setInitState("ready");
+  }, [setActiveSession]);
 
   return {
     messages: chat.messages,
@@ -354,6 +354,7 @@ export function useIntentCtrlChat(apiUrl: string, apiKey: string): IntentCtrlCha
     denyToolCall,
     switchSession,
     newSession,
+    clearSession,
     refreshSessions,
     session: {
       activeSessionId,

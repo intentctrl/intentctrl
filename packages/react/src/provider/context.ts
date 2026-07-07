@@ -12,6 +12,7 @@ export interface IntentCtrlChat {
   denyToolCall: (toolCallId: string) => void;
   switchSession: (sessionId: string) => Promise<void>;
   newSession: () => Promise<void>;
+  clearSession: () => Promise<void>;
   refreshSessions: () => Promise<void>;
   session: SessionState;
 }

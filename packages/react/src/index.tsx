@@ -19,3 +19,6 @@ export { usePermissions } from "./hooks/usePermissions";
 // AI SDK types
 export type { UIMessage, ChatStatus, ToolUIPart, DynamicToolUIPart, FileUIPart, SourceDocumentUIPart } from "ai";
 export type { SessionState, SessionInitState } from "./adapters/ai-sdk";
+
+// AI SDK utilities
+export { getToolName, isTextUIPart, isReasoningUIPart, isToolUIPart } from "ai";

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "typing-cursor",
+  "title": "Typing Cursor",
+  "description": "Animated typing indicator dots",
+  "files": [
+    {
+      "path": "components/chat/typing-cursor.tsx",
+      "content": "\"use client\";\n\nfunction TypingCursor() {\n  return (\n    <span className=\"ml-0.5 inline-flex items-center gap-0.5\">\n      <span className=\"size-1.5 motion-reduce:animate-none animate-bounce rounded-full bg-current [animation-delay:0ms]\" />\n      <span className=\"size-1.5 motion-reduce:animate-none animate-bounce rounded-full bg-current [animation-delay:150ms]\" />\n      <span className=\"size-1.5 motion-reduce:animate-none animate-bounce rounded-full bg-current [animation-delay:300ms]\" />\n    </span>\n  );\n}\n\nexport { TypingCursor };\n",
+      "type": "registry:component",
+      "target": "components/chat/typing-cursor.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

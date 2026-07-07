@@ -3,11 +3,11 @@ import { computeCSSSelector } from "./selectors";
 
 const NOISE_TAGS = "script,style,noscript,template,link,meta,nextjs-portal";
 const NOISE_SELECTORS =
-  '[data-ai-ignore],[aria-hidden="true"],[hidden],[data-nextjs-toast],[data-nextjs-dialog-overlay],' +
+  '[data-ignore],[aria-hidden="true"],[hidden],[data-nextjs-toast],[data-nextjs-dialog-overlay],' +
   "[data-nextjs-error-overlay],[data-nextjs-refresh-root],[data-nextjs-scroll-focus-boundary]," +
   "#__next-build-watcher,#__next-prerender-indicator,[data-vercel-toolbar],#__vercel-toolbar";
 
-const SKIP = "data-ai-md-skip";
+const SKIP = "data-md-skip";
 const MAX_STYLE_SCAN = 4000;
 
 const BLOCK_TAGS = new Set(
@@ -47,7 +47,7 @@ export class MarkdownAnnotator {
     if (typeof root === "string") {
       const c = document.createElement("div");
       c.innerHTML = root;
-      return this.prune(c);
+      return this.seedBlanks(this.prune(c));
     }
     const live = root as Element;
     const attached = live.isConnected && typeof window !== "undefined";
@@ -55,7 +55,19 @@ export class MarkdownAnnotator {
     const clone = live.cloneNode(true) as HTMLElement;
     if (attached) live.querySelectorAll(`[${SKIP}]`).forEach((el) => el.removeAttribute(SKIP));
     clone.querySelectorAll(`[${SKIP}]`).forEach((n) => n.remove());
-    return this.prune(clone);
+    return this.seedBlanks(this.prune(clone));
+  }
+
+  /** Turndown skips blank nodes (empty textContent) before checking custom rules.
+   *  Seed interactive elements that have an aria-label so they aren't treated as blank. */
+  private seedBlanks(root: HTMLElement): HTMLElement {
+    const sel = '[role="switch"],[role="button"],button';
+    root.querySelectorAll(sel).forEach((el) => {
+      if (!el.textContent?.trim() && el.hasAttribute("aria-label")) {
+        el.appendChild(document.createTextNode(el.getAttribute("aria-label")!));
+      }
+    });
+    return root;
   }
 
   private prune(root: HTMLElement): HTMLElement {
@@ -215,6 +227,16 @@ export class MarkdownAnnotator {
         node.nodeName === "INPUT" && ["checkbox", "radio"].includes((node.getAttribute("type") || "").toLowerCase()),
       replacement: (_c, node: any) => {
         const symbol = (node.getAttribute("type") || "").toLowerCase() === "radio" ? "( )" : "[ ]";
+        const label = node.getAttribute("aria-label");
+        return `${symbol}${label ? ` ${label}` : ""}${this.tag(node, true)}`;
+      },
+    });
+
+    s.addRule("md-switch", {
+      filter: (node: any) => node.getAttribute?.("role") === "switch",
+      replacement: (_c, node: any) => {
+        const checked = node.getAttribute("aria-checked") === "true" || node.hasAttribute("data-checked");
+        const symbol = checked ? "[x]" : "[ ]";
         const label = node.getAttribute("aria-label");
         return `${symbol}${label ? ` ${label}` : ""}${this.tag(node, true)}`;
       },

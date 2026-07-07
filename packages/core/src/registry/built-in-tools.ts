@@ -12,49 +12,50 @@ export const builtInSchemas = {
     target: z.string().describe("Route path to navigate to"),
   }),
   click: z.object({
-    label: z.string().describe("Accessible label of element to click"),
+    label: z.string().describe('The css="..." selector from the page context annotation.'),
   }),
   type: z.object({
-    field: z.string().describe("Accessible label of input field"),
+    field: z.string().describe('The css="..." selector from the page context annotation.'),
     value: z.string().max(10_000).describe("Value to type into the field"),
   }),
   highlight: z.object({
-    region: z.string().describe("Region label or data-ai-region value"),
+    region: z.string().describe('The css="..." selector from the page context annotation.'),
   }),
   scroll: z.object({
-    target: z.string().describe("Element label or region to scroll to"),
-  }),
-  extract: z.object({
-    field: z.string().describe("Field label to read value from"),
+    target: z.string().describe('The css="..." selector from the page context annotation.'),
   }),
 } as const;
 
 export const builtInTools = [
   {
     id: "navigate",
-    description: "Navigate to a route in the application",
+    description: "Navigate to a route in the application. Do not include the origin or query strings.",
     inputSchema: builtInSchemas.navigate,
     needsApproval: true,
   },
   {
     id: "click",
-    description: "Click a button or interactive element by its label",
+    description: 'Click an element. Pass the `css="..."` selector from the page annotation, not a description.',
     inputSchema: builtInSchemas.click,
     needsApproval: true,
   },
   {
     id: "type",
-    description: "Type a value into an input field",
+    description: 'Type into an input. Pass the `css="..."` selector from the page annotation.',
     inputSchema: builtInSchemas.type,
     needsApproval: true,
   },
   {
     id: "highlight",
-    description: "Visually highlight a page region to guide the user",
+    description: 'Highlight a page region. Pass the `css="..."` selector from the annotation.',
     inputSchema: builtInSchemas.highlight,
   },
-  { id: "scroll", description: "Scroll a specific element or region into view", inputSchema: builtInSchemas.scroll },
-  { id: "extract", description: "Read the current value of a field or element", inputSchema: builtInSchemas.extract },
+  {
+    id: "scroll",
+    description:
+      'Scroll an element into view. Pass the `css="..."` selector from the annotation for precise targeting.',
+    inputSchema: builtInSchemas.scroll,
+  },
 ] as const satisfies readonly BuiltInToolDefinition[];
 
 export type BuiltInToolName = (typeof builtInTools)[number]["id"];

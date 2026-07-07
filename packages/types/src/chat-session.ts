@@ -5,6 +5,7 @@ export interface ChatSessionResponse {
   externalUserId: string | null;
   visitorId: string;
   active: boolean;
+  title: string;
   createdAt: string;
   updatedAt: string;
 }

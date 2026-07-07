@@ -62,6 +62,7 @@ export function IntentCtrlProvider({
         denyToolCall: chat.denyToolCall,
         switchSession: chat.switchSession,
         newSession: chat.newSession,
+        clearSession: chat.clearSession,
         refreshSessions: chat.refreshSessions,
         session: chat.session,
       }}

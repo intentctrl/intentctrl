@@ -2,5 +2,88 @@
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "intentctrl",
   "homepage": "https://intentctrl.com",
-  "items": []
+  "items": [
+    {
+      "name": "shimmer",
+      "type": "registry:component",
+      "title": "Shimmer",
+      "description": "Animated shimmer text effect for loading states",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "components/chat/shimmer.tsx",
+          "type": "registry:component",
+          "target": "components/chat/shimmer.tsx"
+        }
+      ]
+    },
+    {
+      "name": "typing-cursor",
+      "type": "registry:component",
+      "title": "Typing Cursor",
+      "description": "Animated typing indicator dots",
+      "files": [
+        {
+          "path": "components/chat/typing-cursor.tsx",
+          "type": "registry:component",
+          "target": "components/chat/typing-cursor.tsx"
+        }
+      ]
+    },
+    {
+      "name": "reasoning-block",
+      "type": "registry:component",
+      "title": "Reasoning Block",
+      "description": "Collapsible reasoning display with shimmer animation",
+      "dependencies": ["@tabler/icons-react"],
+      "registryDependencies": ["collapsible", "shimmer"],
+      "files": [
+        {
+          "path": "components/chat/reasoning-block.tsx",
+          "type": "registry:component",
+          "target": "components/chat/reasoning-block.tsx"
+        }
+      ]
+    },
+    {
+      "name": "tool-card",
+      "type": "registry:component",
+      "title": "Tool Card",
+      "description": "Collapsible tool invocation card with approval controls",
+      "dependencies": ["@tabler/icons-react", "@intentctrl/react"],
+      "registryDependencies": ["collapsible", "button"],
+      "files": [
+        {
+          "path": "components/chat/tool-card.tsx",
+          "type": "registry:component",
+          "target": "components/chat/tool-card.tsx"
+        }
+      ]
+    },
+    {
+      "name": "popover-chat",
+      "type": "registry:block",
+      "title": "Popover Chat",
+      "description": "Full-featured chat widget in a popover with sessions, reasoning, tool calls, streaming, and suggestions",
+      "dependencies": ["@tabler/icons-react", "@intentctrl/react"],
+      "registryDependencies": [
+        "message",
+        "bubble",
+        "button",
+        "skeleton",
+        "textarea",
+        "shimmer",
+        "typing-cursor",
+        "reasoning-block",
+        "tool-card"
+      ],
+      "files": [
+        {
+          "path": "components/widgets/popover-chat.tsx",
+          "type": "registry:block",
+          "target": "components/widgets/popover-chat.tsx"
+        }
+      ]
+    }
+  ]
 }

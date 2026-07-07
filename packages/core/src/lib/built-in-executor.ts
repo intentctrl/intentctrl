@@ -13,14 +13,16 @@ function isEditable(el: Element): el is EditableElement {
   return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
 }
 
-function findByLabel(label: string): Element | null {
+function findByRegionOrLabel(label: string): Element | null {
+  // CSS selector (LLM returns css="..." from page context annotations)
+  try {
+    const byCss = document.querySelector(label);
+    if (byCss) return byCss;
+  } catch {
+    // Invalid CSS selector — fall through to attribute / text matching
+  }
+
   const escaped = CSS.escape(label);
-
-  const byField = document.querySelector(`[data-ai-field="${escaped}"]`);
-  if (byField) return byField;
-
-  const byAction = document.querySelector(`[data-ai-action="${escaped}"]`);
-  if (byAction) return byAction;
 
   const byAriaLabel = document.querySelector(`[aria-label="${escaped}"]`);
   if (byAriaLabel) return byAriaLabel;
@@ -35,10 +37,6 @@ function findByLabel(label: string): Element | null {
   }
 
   return null;
-}
-
-function findByRegionOrLabel(value: string): Element | null {
-  return document.querySelector(`[data-ai-region="${CSS.escape(value)}"]`) ?? findByLabel(value);
 }
 
 function setNativeEditableValue(el: EditableElement, value: string): void {
@@ -63,7 +61,7 @@ export async function executeBuiltIn(toolName: string, input: unknown): Promise<
 
     case "click": {
       const { label } = builtInSchemas.click.parse(input);
-      const el = findByLabel(label);
+      const el = findByRegionOrLabel(label);
       if (!el) throw new Error(`Element not found: "${label}"`);
       (el as HTMLElement).click();
       return { success: true };
@@ -71,7 +69,7 @@ export async function executeBuiltIn(toolName: string, input: unknown): Promise<
 
     case "type": {
       const { field, value } = builtInSchemas.type.parse(input);
-      const el = findByLabel(field);
+      const el = findByRegionOrLabel(field);
       if (!el) throw new Error(`Field not found: "${field}"`);
       if (!isEditable(el)) throw new Error(`Element is not editable: "${field}"`);
       setNativeEditableValue(el, sanitizeTypeValue(value));
@@ -82,8 +80,8 @@ export async function executeBuiltIn(toolName: string, input: unknown): Promise<
       const { region } = builtInSchemas.highlight.parse(input);
       const el = findByRegionOrLabel(region);
       if (!el) throw new Error(`Region not found: "${region}"`);
-      el.setAttribute("data-ai-highlight", "true");
-      setTimeout(() => el.removeAttribute("data-ai-highlight"), 3000);
+      el.setAttribute("data-highlight", "true");
+      setTimeout(() => el.removeAttribute("data-highlight"), 3000);
       return { success: true };
     }
 
@@ -93,13 +91,6 @@ export async function executeBuiltIn(toolName: string, input: unknown): Promise<
       if (!el) throw new Error(`Element not found: "${target}"`);
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       return { success: true };
-    }
-
-    case "extract": {
-      const { field } = builtInSchemas.extract.parse(input);
-      const el = findByLabel(field);
-      if (!el) throw new Error(`Field not found: "${field}"`);
-      return isEditable(el) ? el.value : (el.textContent?.trim() ?? "");
     }
   }
 }
