@@ -34,11 +34,11 @@ export function DesktopNav() {
             </div>
           </NavigationMenuContent>
         </NavigationMenuItem>
-        <NavigationMenuLink asChild className="px-4">
+        {/* <NavigationMenuLink asChild className="px-4">
           <Link className="rounded-md p-2 hover:bg-accent" href="/#pricing">
             Pricing
           </Link>
-        </NavigationMenuLink>
+        </NavigationMenuLink> */}
         <NavigationMenuLink asChild className="px-4">
           <Link className="rounded-md p-2 hover:bg-accent" href="https://docs.intentctrl.com">
             Docs

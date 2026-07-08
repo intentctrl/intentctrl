@@ -12,7 +12,7 @@ When the AI calls a tool that has `needsApproval: true`, the execution pauses. T
 The user either approves or denies the call:
 
 ```tsx
-const { approveToolCall, denyToolCall } = useIntentCtrl();
+const { approveToolCall, denyToolCall } = useIntentCtrlChat();
 
 await approveToolCall(toolCallId); // tool executes
 denyToolCall(toolCallId); // tool is cancelled

@@ -8,13 +8,13 @@ An embedded AI runtime for React applications. It connects your app to an AI ass
 
 ## How it works
 
-Wrap your application in `<IntentCtrlProvider>`, and every component beneath it gets access to the AI chat via `useIntentCtrl()`. When the user sends a message, the current page is captured as structured content, bundled with your registered tools, and sent to your AI backend. The AI can respond naturally and call tools — both built-in DOM actions and your own custom functions.
+Wrap your application in `<IntentCtrlProvider>`, and every component beneath it gets access to the AI chat via `useIntentCtrlChat()`. When the user sends a message, the current page is captured as structured content, bundled with your registered tools, and sent to your AI backend. The AI can respond naturally and call tools — both built-in DOM actions and your own custom functions.
 
 ## What you get
 
 - **Streaming chat** — real-time AI responses with a single hook
 - **Page-aware AI** — the assistant sees the page the user is looking at
-- **Built-in tools** — navigate, click, type, scroll, highlight, and extract page content
+- **Built-in tools** — navigate, click, type, scroll, and highlight
 - **Custom tools** — register your own functions with typed inputs
 - **Permissions** — control which tools the AI may use, per user
 - **Approval workflows** — require user confirmation before sensitive actions

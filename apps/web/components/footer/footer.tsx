@@ -25,7 +25,7 @@ const footerLinks: FooterSection[] = [
     links: [
       { title: "Documentation", href: "https://docs.intentctrl.com" },
       { title: "Features", href: "/#features" },
-      { title: "Pricing", href: "/#pricing" },
+      // { title: "Pricing", href: "/#pricing" },
       { title: "Integrations", href: "/#integrations" },
     ],
   },

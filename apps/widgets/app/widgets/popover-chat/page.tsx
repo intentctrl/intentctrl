@@ -64,6 +64,12 @@ export default function PopoverChatPage() {
       </section>
 
       <section>
+        <h2 className="mb-3 text-sm font-semibold">Demo</h2>
+        <p className="text-sm text-muted-foreground">Click the chat button in the bottom-right corner</p>
+        <PopoverChat chat={chat} title="AI Assistant" description="Ask me anything" placeholder="Type a message..." />
+      </section>
+
+      <section>
         <h2 className="mb-3 text-sm font-semibold">Usage</h2>
         <CodeBlock>
           <CodeBlockHeader>
@@ -110,12 +116,6 @@ export default function App() {
             />
           </CodeBlockContent>
         </CodeBlock>
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold">Demo</h2>
-        <p className="text-sm text-muted-foreground">Click the chat button in the bottom-right corner</p>
-        <PopoverChat chat={chat} title="AI Assistant" description="Ask me anything" placeholder="Type a message..." />
       </section>
     </div>
   );

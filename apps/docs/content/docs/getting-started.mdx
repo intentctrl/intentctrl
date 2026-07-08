@@ -47,7 +47,7 @@ Make sure `react`, `react-dom`, and `zod` are already in your project.
 <Step>
 ### Add the provider
 
-Wrap your application (or the part that needs AI) in `IntentCtrlProvider`. You need the URL of an AI backend and an API key. Use the [cloud platform](http://app.intentctrl.com) directly, or [self-host the backend](https://github.com/intentctrl) for free.
+Wrap your application (or the part that needs AI) in `IntentCtrlProvider`. You need an API key and the URL of an AI backend. Use the [cloud platform](http://app.intentctrl.com) directly, or [self-host the backend](https://github.com/intentctrl) for free.
 
 ```tsx title="app/layout.tsx"
 import { IntentCtrlProvider } from "@intentctrl/react";
@@ -66,13 +66,13 @@ export default function RootLayout({ children }) {
 <Step>
 ### Start a chat
 
-Inside any child component, use `useIntentCtrl()` to send messages and display responses.
+Inside any child component, use `useIntentCtrlChat()` to send messages and display responses.
 
 ```tsx title="components/chat-panel.tsx"
-import { useIntentCtrl } from "@intentctrl/react";
+import { useIntentCtrlChat } from "@intentctrl/react";
 
 export function ChatPanel() {
-  const { messages, sendMessage, status } = useIntentCtrl();
+  const { messages, sendMessage, status } = useIntentCtrlChat();
 
   return (
     <div>

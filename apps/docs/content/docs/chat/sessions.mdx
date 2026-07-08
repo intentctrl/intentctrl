@@ -16,7 +16,7 @@ All session data is persisted locally via IndexedDB and synced to your backend t
 Users can switch between conversations:
 
 ```tsx
-const { session, switchSession, newSession, refreshSessions } = useIntentCtrl();
+const { session, switchSession, newSession, clearSession, refreshSessions } = useIntentCtrlChat();
 
 // Switch to a past conversation
 await switchSession("session-id-123");
@@ -36,17 +36,22 @@ session.sessions; // { items, rowCount, pageCount, pageIndex, pageSize }
 session.initState; // "idle" | "loading" | "ready" | "error"
 ```
 
+## Clear session
+
+Call `clearSession()` to reset the local state without creating a server-side session. The next message will lazily create a fresh session.
+
 The session list is paginated. Each item in `items` represents a conversation with its id, timestamps, and associated user information.
 
 ## Example: Session sidebar
 
 ```tsx title="components/session-sidebar.tsx"
 export function SessionSidebar() {
-  const { session, switchSession, newSession } = useIntentCtrl();
+  const { session, switchSession, newSession, clearSession } = useIntentCtrlChat();
 
   return (
     <div>
       <button onClick={newSession}>New conversation</button>
+      <button onClick={clearSession}>Clear session</button>
 
       <ul>
         {session.sessions.items.map((s) => (

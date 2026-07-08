@@ -3,7 +3,7 @@ title: Chat Interface
 description: Sending messages and handling responses
 ---
 
-The chat interface is the primary way users interact with the AI. All functionality is available through the `useIntentCtrl()` hook.
+The chat interface is the primary way users interact with the AI. All functionality is available through the `useIntentCtrlChat()` hook.
 
 ## Hook reference
 
@@ -14,7 +14,7 @@ const {
   status, // Current state of the chat
   stop, // Abort an in-progress response
   error, // Latest error message, if any
-} = useIntentCtrl();
+} = useIntentCtrlChat();
 ```
 
 ### messages
@@ -66,7 +66,7 @@ Interrupts a response that's currently streaming. The response will be cut off a
 
 ```tsx title="components/chat-window.tsx"
 export function ChatWindow() {
-  const { messages, sendMessage, status, stop, error } = useIntentCtrl();
+  const { messages, sendMessage, status, stop, error } = useIntentCtrlChat();
 
   return (
     <div>

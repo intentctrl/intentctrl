@@ -41,7 +41,7 @@ The root provider component. Must wrap any component that uses IntentCtrl hooks.
 
 ## Hooks
 
-### useIntentCtrl
+### useIntentCtrlChat
 
 Returns the full chat interface. Throws if used outside `IntentCtrlProvider`.
 
@@ -80,7 +80,11 @@ Returns the full chat interface. Throws if used outside `IntentCtrlProvider`.
       type: "(sessionId: string) => Promise<void>",
     },
     newSession: {
-      description: "Create a new conversation session",
+      description: "Reset local state without creating a server session. The next message will lazily create one.",
+      type: "() => Promise<void>",
+    },
+    clearSession: {
+      description: "Clear the active session and reset to a clean local state.",
       type: "() => Promise<void>",
     },
     refreshSessions: {
@@ -206,10 +210,6 @@ Controls which built-in tools are available to the AI.
     },
     scroll: {
       description: "Scroll an element into view",
-      type: "boolean",
-    },
-    extract: {
-      description: "Read a field's value or text",
       type: "boolean",
     },
   }}

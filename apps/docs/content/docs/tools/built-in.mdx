@@ -7,23 +7,25 @@ Built-in tools give the AI the ability to interact with the page the same way a 
 
 ## How the AI targets elements
 
-When the AI receives the page content, every interactive element is annotated with selector information. The annotations let the AI reference specific elements by their location on the page.
+When the AI receives the page content, every element is annotated with a CSS selector. The annotations let the AI reference specific elements on the page using the `css="..."` syntax:
 
-You can help the AI identify important elements by adding data attributes:
+```html
+<!-- css="main > div.container > button:nth-of-type(2)" -->
+```
 
-| Attribute           | Used by           | Purpose                                                         |
-| ------------------- | ----------------- | --------------------------------------------------------------- |
-| `data-ai-field`     | type, extract     | Marks input fields, textareas, and selects                      |
-| `data-ai-action`    | click             | Marks clickable elements                                        |
-| `data-ai-region`    | highlight, scroll | Marks areas or containers                                       |
-| `data-ai-highlight` | —                 | Set automatically by the highlight tool on the targeted element |
+The selector is computed automatically — you don't need to add anything. Elements are annotated based on their type: buttons, links, inputs, textareas, selects, and other interactive elements are detected and tagged.
 
-Adding these attributes is optional but makes targeting more reliable.
+You can make targeting more reliable by adding `aria-label`, `placeholder`, or `data-testid` attributes. The tool executor falls back through these strategies when looking up an element:
+
+- CSS selector (from the annotation)
+- `aria-label` attribute
+- `placeholder` attribute
+- Visible text content match
 
 You can style highlighted elements with CSS:
 
 ```css title="app/globals.css"
-[data-ai-highlight] {
+[data-highlight] {
   outline: 3px solid #3b82f6;
   outline-offset: 2px;
   border-radius: 4px;
@@ -53,7 +55,7 @@ Clicks an interactive element.
 { "label": "Submit" }
 ```
 
-Matches by `data-ai-action`, `aria-label`, placeholder, or visible text. Triggers the element's native click handler.
+Matches by `aria-label`, `placeholder`, or visible text. Triggers the element's native click handler.
 
 ### type
 
@@ -73,7 +75,17 @@ Briefly flashes an element to draw the user's attention.
 { "region": "Error summary" }
 ```
 
-The element is highlighted for three seconds. No approval needed — purely visual feedback.
+Sets `data-highlight="true"` on the element for three seconds. Style it with CSS:
+
+```css
+[data-highlight] {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+```
+
+No approval needed — purely visual feedback.
 
 ### scroll
 
@@ -84,16 +96,6 @@ Scrolls an element into the viewport.
 ```
 
 Smooth scrolls to the element and centers it on screen.
-
-### extract
-
-Reads the current value or text content of an element.
-
-```json
-{ "field": "Search input" }
-```
-
-Returns the element's value (for inputs), text content (for general elements), or inner text (for contenteditable regions).
 
 ## Controlling availability
 
